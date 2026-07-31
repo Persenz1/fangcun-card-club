@@ -14,6 +14,7 @@
 - 麻将 34 种牌、确定性牌墙、手牌/副露/牌河公共模型与和牌形分析
 - 可完整运行的大众麻将吃碰杠胡、番型结算与基础 AI
 - 可完整运行的四川麻将换三张、定缺、血战、刮风下雨、流局检查与基础 AI
+- 可完整运行的四人日式立直麻将东风战、振听、宝牌、符番结算与基础 AI
 - xUnit 自动测试
 - 960×540 逻辑画布下的大厅、斗地主和麻将交互灰盒
 - 16:9 核心安全区与 20:9 手机宽屏延展策略
@@ -124,14 +125,16 @@ fangcun-card-club/
 │   │   ├── Table/                  # 座位、牌墙、牌河与桌面状态原语
 │   │   └── Tiles/                  # 34 种语义牌及 108/136 张实体牌组
 │   ├── Game.Mahjong.Standard/      # 大众麻将状态机、番型、结算与 AI
-│   └── Game.Mahjong.Sichuan/       # 四川血战状态机、番型、结算与 AI
+│   ├── Game.Mahjong.Sichuan/       # 四川血战状态机、番型、结算与 AI
+│   └── Game.Mahjong.Riichi/        # 日麻东风战、振听、符番、宝牌与 AI
 ├── tests/
 │   ├── Game.Application.Tests/     # 档案、经济与斗地主恢复测试
 │   ├── Game.Core.Tests/
 │   ├── Game.Doudizhu.Tests/        # 牌堆、牌型、比较与合法出牌测试
 │   ├── Game.Mahjong.Tests/         # 麻将公共牌、桌面与和牌形测试
 │   ├── Game.Mahjong.Standard.Tests/ # 大众麻将规则与模拟测试
-│   └── Game.Mahjong.Sichuan.Tests/ # 四川麻将规则与模拟测试
+│   ├── Game.Mahjong.Sichuan.Tests/ # 四川麻将规则与模拟测试
+│   └── Game.Mahjong.Riichi.Tests/  # 日麻规则、计分与整场模拟测试
 ├── 美术概念/                       # 当前概念图，不是最终拆分素材
 ├── .editorconfig                   # 通用文本与 C# 格式
 ├── .gitignore                      # 缓存、产物和凭据忽略规则
