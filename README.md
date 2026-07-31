@@ -10,6 +10,7 @@
 - 标准 54 张斗地主牌堆与洗牌
 - 斗地主 14 类经典牌型识别、比较与完整合法出牌枚举
 - 可从发牌运行到结算的斗地主叫抢/出牌状态机与基础 AI
+- 本地豆子、免费补给、版本化 JSON 档案与确定性斗地主对局恢复
 - xUnit 自动测试
 - 960×540 逻辑画布下的大厅、斗地主和麻将交互灰盒
 - 16:9 核心安全区与 20:9 手机宽屏延展策略
@@ -98,7 +99,10 @@ fangcun-card-club/
 │   └── verify.sh                   # 构建、测试与启动验证
 ├── src/
 │   ├── Game.Core/                  # 通用命令、事件和确定性随机数
-│   ├── Game.Application/           # 对局编排边界
+│   ├── Game.Application/
+│   │   ├── Doudizhu/              # 斗地主玩家会话、AI 调度与命令重放恢复
+│   │   ├── Profiles/               # 本地豆子、战绩与版本化 JSON 档案
+│   │   └── Sessions/               # 通用对局会话边界
 │   └── Game.Doudizhu/
 │       ├── AI/                     # 只读观察驱动的基础斗地主 AI
 │       ├── Cards/                  # 扑克牌、牌点、牌堆与洗牌
@@ -109,6 +113,7 @@ fangcun-card-club/
 │       ├── Settlement/             # 倍数、春天与三方零和结算
 │       └── State/                  # 发牌、叫抢和出牌状态机
 ├── tests/
+│   ├── Game.Application.Tests/     # 档案、经济与斗地主恢复测试
 │   ├── Game.Core.Tests/
 │   └── Game.Doudizhu.Tests/        # 牌堆、牌型、比较与合法出牌测试
 ├── 美术概念/                       # 当前概念图，不是最终拆分素材
