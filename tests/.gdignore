@@ -1,0 +1,1 @@
+# Test projects are executed by dotnet test, not imported as Godot resources.

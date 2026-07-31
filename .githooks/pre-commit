@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+task_repo_root="$(git rev-parse --show-toplevel)"
+cd "$task_repo_root"
+
+mapfile -d '' -t task_staged_files < <(git diff --cached --name-only --diff-filter=ACMR -z)
+
+if [[ ${#task_staged_files[@]} -eq 0 ]]; then
+  exit 0
+fi
+
+task_has_archive=0
+for task_file in "${task_staged_files[@]}"; do
+  if [[ "$task_file" =~ ^docs/tasks/[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{3}-.+\.md$ ]]; then
+    task_has_archive=1
+    break
+  fi
+done
+
+if [[ $task_has_archive -ne 1 ]]; then
+  printf 'Commit blocked: stage a matching docs/tasks/YYYY-MM-DD-NNN-任务名.md record.\n' >&2
+  exit 1
+fi
+
+if ! git diff --cached --quiet --diff-filter=ADR && ! printf '%s\n' "${task_staged_files[@]}" | rg -qx 'README\.md'; then
+  printf 'Commit blocked: added/deleted/renamed files require an updated root README project tree.\n' >&2
+  exit 1
+fi
+
+mapfile -d '' -t task_structural_docs < <(git diff --cached --name-only --diff-filter=ADR -z -- docs)
+if [[ ${#task_structural_docs[@]} -gt 0 ]]; then
+  if ! printf '%s\n' "${task_staged_files[@]}" | rg -qx 'docs/README\.md'; then
+    printf 'Commit blocked: document structure changes require an updated docs/README.md index.\n' >&2
+    exit 1
+  fi
+fi
+
+./scripts/check-docs.sh
+./scripts/check-gitignore.sh

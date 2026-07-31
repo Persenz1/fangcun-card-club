@@ -1,0 +1,53 @@
+# Project-local toolchain and package cache
+.tools/
+.packages/
+.cache/
+
+# Godot generated data
+.godot/
+# Keep *.uid and resource sidecars such as *.png.import tracked.
+
+# .NET build output
+**/bin/
+**/obj/
+TestResults/
+coverage/
+*.trx
+*.coverage
+*.coveragexml
+
+# IDE and OS files
+.idea/
+.vs/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/tasks.json
+*.user
+*.csproj.user
+*.suo
+.DS_Store
+._*
+Desktop.ini
+Thumbs.db
+
+# Local saves, logs and exported builds
+artifacts/
+exports/
+logs/
+user-data/
+*.log
+*.tmp
+*.bak
+
+# Local credentials and signing material
+.env
+.env.*
+!.env.example
+export_credentials.cfg
+*.keystore
+*.jks
+*.pfx
+*.p12
+*.mobileprovision
+*.pem
+*.key

@@ -1,0 +1,1 @@
+# Pure .NET projects are built through ProjectReference, not imported as Godot resources.

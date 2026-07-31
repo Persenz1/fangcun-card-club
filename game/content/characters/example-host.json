@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "id": "example_host",
+  "display_name": "临时看板角色",
+  "portraits": {
+    "neutral": "",
+    "happy": "",
+    "thinking": "",
+    "surprised": "",
+    "angry": ""
+  },
+  "full_body": "",
+  "dialogue_set": "host_default",
+  "ai_personality_id": "balanced",
+  "source_note": "Placeholder definition. Art can be replaced without changing gameplay code."
+}

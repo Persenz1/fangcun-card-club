@@ -1,0 +1,18 @@
+<Project Sdk="Godot.NET.Sdk/4.7.1">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <RootNamespace>FangcunCardClub.Game</RootNamespace>
+    <AssemblyName>FangcunCardClub.Game</AssemblyName>
+    <EnableDynamicLoading>true</EnableDynamicLoading>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="game/scripts/**/*.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="src/Game.Application/Game.Application.csproj" />
+    <ProjectReference Include="src/Game.Doudizhu/Game.Doudizhu.csproj" />
+  </ItemGroup>
+</Project>
