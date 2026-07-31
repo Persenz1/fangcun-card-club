@@ -28,9 +28,14 @@ public sealed class MahjongWall
         ArgumentNullException.ThrowIfNull(tiles);
 
         _tiles = tiles.ToArray();
-        if (_tiles.Length != 136 || _tiles.Distinct().Count() != 136)
+        if (_tiles.Length is not (108 or 136)
+            || _tiles.Distinct().Count() != _tiles.Length
+            || _tiles.GroupBy(tile => tile.Kind).Any(group => group.Count() != 4)
+            || _tiles.Length == 108 && _tiles.Any(tile => tile.Kind.IsHonor()))
         {
-            throw new ArgumentException("A Mahjong wall must contain 136 unique physical tiles.", nameof(tiles));
+            throw new ArgumentException(
+                "A Mahjong wall must contain either the complete 108 suited tiles or all 136 tiles.",
+                nameof(tiles));
         }
 
         if (deadWallSize is < 0 or > 14)

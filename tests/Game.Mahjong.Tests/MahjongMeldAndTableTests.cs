@@ -71,4 +71,25 @@ public sealed class MahjongMeldAndTableTests
         Assert.True(table.GetRiver(MahjongSeat.East).Single().IsClaimed);
         Assert.Equal(caller, table.CurrentSeat);
     }
+
+    [Fact]
+    public void Opening_exchange_moves_all_selected_physical_tiles_atomically()
+    {
+        var wall = new MahjongWall(MahjongTileSet.CreateSuitedShuffled(new SplitMix64Random(10)));
+        var table = new MahjongTableState(wall, drawDealerOpeningTile: false);
+        var outgoing = Enum.GetValues<MahjongSeat>().ToDictionary(
+            seat => seat,
+            seat => (IReadOnlyList<MahjongTile>)table.GetConcealedTiles(seat).Take(3).ToArray());
+
+        table.ExchangeTiles(outgoing, recipientOffset: 1);
+
+        foreach (var seat in Enum.GetValues<MahjongSeat>())
+        {
+            Assert.Equal(13, table.GetConcealedTiles(seat).Count);
+            var source = (MahjongSeat)(((int)seat + 3) % 4);
+            Assert.All(outgoing[source], tile => Assert.Contains(tile, table.GetConcealedTiles(seat)));
+        }
+
+        Assert.Throws<InvalidOperationException>(() => table.ExchangeTiles(outgoing, recipientOffset: 1));
+    }
 }

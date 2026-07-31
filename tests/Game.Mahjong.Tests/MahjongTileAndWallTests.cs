@@ -18,6 +18,18 @@ public sealed class MahjongTileAndWallTests
     }
 
     [Fact]
+    public void Suited_set_has_108_unique_physical_tiles_and_no_honors()
+    {
+        var tiles = MahjongTileSet.CreateSuitedOrdered();
+
+        Assert.Equal(108, tiles.Count);
+        Assert.Equal(108, tiles.Distinct().Count());
+        Assert.Equal(27, tiles.GroupBy(tile => tile.Kind).Count());
+        Assert.DoesNotContain(tiles, tile => tile.Kind.IsHonor());
+        Assert.All(tiles.GroupBy(tile => tile.Kind), group => Assert.Equal(4, group.Count()));
+    }
+
+    [Fact]
     public void Shuffle_and_wall_draws_are_deterministic()
     {
         var first = new MahjongWall(new SplitMix64Random(20260801), deadWallSize: 14);
@@ -46,6 +58,17 @@ public sealed class MahjongTileAndWallTests
         Assert.All(snapshot.Hands.Skip(1), hand => Assert.Equal(13, hand.Count));
         Assert.Equal(83, snapshot.LiveTilesRemaining);
         Assert.Equal(53, snapshot.Hands.SelectMany(hand => hand).Distinct().Count());
+    }
+
+    [Fact]
+    public void Suited_table_can_pause_after_deal_for_opening_exchange()
+    {
+        var wall = new MahjongWall(MahjongTileSet.CreateSuitedShuffled(new SplitMix64Random(9)));
+        var table = new MahjongTableState(wall, drawDealerOpeningTile: false);
+
+        Assert.All(table.Snapshot.Hands, hand => Assert.Equal(13, hand.Count));
+        Assert.Null(table.Snapshot.LastDrawnTile);
+        Assert.Equal(56, table.Wall.LiveTilesRemaining);
     }
 
     [Fact]

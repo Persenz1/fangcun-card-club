@@ -14,18 +14,23 @@ public sealed class MahjongTableState
         .ToArray();
     private MahjongTile? _lastDrawnTile;
     private MahjongSeat? _lastDiscardSeat;
+    private bool _tilesWereExchanged;
     private long _riverSequence;
 
     public MahjongTableState(
         IDeterministicRandom random,
         MahjongSeat dealer = MahjongSeat.East,
         int deadWallSize = 0,
-        int replacementLimit = 4)
-        : this(new MahjongWall(random, deadWallSize, replacementLimit), dealer)
+        int replacementLimit = 4,
+        bool drawDealerOpeningTile = true)
+        : this(new MahjongWall(random, deadWallSize, replacementLimit), dealer, drawDealerOpeningTile)
     {
     }
 
-    public MahjongTableState(MahjongWall wall, MahjongSeat dealer = MahjongSeat.East)
+    public MahjongTableState(
+        MahjongWall wall,
+        MahjongSeat dealer = MahjongSeat.East,
+        bool drawDealerOpeningTile = true)
     {
         ArgumentNullException.ThrowIfNull(wall);
         if (!Enum.IsDefined(dealer))
@@ -37,7 +42,10 @@ public sealed class MahjongTableState
         Dealer = dealer;
         CurrentSeat = dealer;
         DealStartingHands();
-        DrawCurrent();
+        if (drawDealerOpeningTile)
+        {
+            DrawCurrent();
+        }
     }
 
     public MahjongSeat Dealer { get; }
@@ -162,6 +170,57 @@ public sealed class MahjongTableState
         }
 
         CurrentSeat = seat;
+    }
+
+    public void EndCurrentTurnWithoutDiscard(MahjongSeat seat)
+    {
+        EnsureCurrentSeat(seat);
+        if (_lastDrawnTile is null)
+        {
+            throw new InvalidOperationException("The current player has no completed draw to end.");
+        }
+
+        _lastDrawnTile = null;
+    }
+
+    public void ExchangeTiles(
+        IReadOnlyDictionary<MahjongSeat, IReadOnlyList<MahjongTile>> outgoingTiles,
+        int recipientOffset)
+    {
+        ArgumentNullException.ThrowIfNull(outgoingTiles);
+        if (recipientOffset is < 1 or > 3
+            || outgoingTiles.Count != 4
+            || _tilesWereExchanged
+            || _lastDrawnTile is not null
+            || _rivers.Any(river => river.Count > 0)
+            || _hands.Any(hand => hand.Melds.Count > 0))
+        {
+            throw new InvalidOperationException("Tiles can be exchanged only once before normal play starts.");
+        }
+
+        foreach (var seat in Enum.GetValues<MahjongSeat>())
+        {
+            if (!outgoingTiles.TryGetValue(seat, out var tiles)
+                || tiles.Count != 3
+                || tiles.Distinct().Count() != 3
+                || tiles.Any(tile => !_hands[(int)seat].ConcealedTiles.Contains(tile)))
+            {
+                throw new InvalidOperationException("Every seat must exchange three physical tiles from its hand.");
+            }
+        }
+
+        foreach (var (seat, tiles) in outgoingTiles)
+        {
+            _hands[(int)seat].RemoveTiles(tiles);
+        }
+
+        foreach (var (seat, tiles) in outgoingTiles)
+        {
+            var recipient = (MahjongSeat)(((int)seat + recipientOffset) % 4);
+            _hands[(int)recipient].AddTiles(tiles);
+        }
+
+        _tilesWereExchanged = true;
     }
 
     private void DealStartingHands()
