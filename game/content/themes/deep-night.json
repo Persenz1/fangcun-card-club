@@ -2,9 +2,9 @@
   "schema_version": 1,
   "id": "deep_night_club",
   "display_name": "深夜牌社",
-  "lobby_background": "res://美术概念/大厅dark.png",
-  "doudizhu_background": "res://美术概念/斗地主image.png",
-  "mahjong_background": "res://美术概念/麻将image.png",
+  "lobby_background": "res://game/assets/backgrounds/candidates/bg_lobby_night_v001.png",
+  "doudizhu_background": "res://game/assets/backgrounds/candidates/bg_doudizhu_night_v001.png",
+  "mahjong_background": "res://game/assets/backgrounds/candidates/bg_mahjong_night_v001.png",
   "accent_color": "#43C7B6",
   "warm_color": "#F0B65F",
   "danger_color": "#E45D55"

@@ -1,44 +1,7 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://game/scripts/Bootstrap.cs" id="1_boot"]
-
-[sub_resource type="StyleBoxFlat" id="StylePanel"]
-bg_color = Color(0.043, 0.075, 0.118, 0.96)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.184, 0.663, 0.627, 0.45)
-corner_radius_top_left = 12
-corner_radius_top_right = 12
-corner_radius_bottom_right = 12
-corner_radius_bottom_left = 12
-shadow_color = Color(0, 0, 0, 0.35)
-shadow_size = 8
-
-[sub_resource type="StyleBoxFlat" id="StyleButton"]
-bg_color = Color(0.055, 0.31, 0.298, 1)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.304, 0.812, 0.741, 0.85)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
-
-[sub_resource type="StyleBoxFlat" id="StyleButtonRed"]
-bg_color = Color(0.45, 0.145, 0.16, 1)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.957, 0.459, 0.373, 0.9)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
+[ext_resource type="Theme" path="res://game/assets/ui/GrayboxTheme.tres" id="2_theme"]
 
 [node name="Bootstrap" type="Control"]
 layout_mode = 3
@@ -47,9 +10,10 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = ExtResource("2_theme")
 script = ExtResource("1_boot")
 
-[node name="Background" type="ColorRect" parent="."]
+[node name="WideBackground" type="ColorRect" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -57,125 +21,64 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-color = Color(0.027, 0.043, 0.075, 1)
+color = Color(0.016, 0.025, 0.047, 1)
 
-[node name="NightGlow" type="ColorRect" parent="."]
-layout_mode = 1
-anchors_preset = 10
-anchor_right = 1.0
-offset_bottom = 190.0
-grow_horizontal = 2
-mouse_filter = 2
-color = Color(0.035, 0.18, 0.255, 0.55)
-
-[node name="SafeArea" type="MarginContainer" parent="."]
+[node name="WideEdgeHint" type="Label" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 28.0
-offset_top = 24.0
-offset_right = -28.0
-offset_bottom = -24.0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.2, 0.32, 0.4, 0.65)
+theme_override_font_sizes/font_size = 12
+text = "宽屏延展区"
+vertical_alignment = 2
+
+[node name="FrameCenter" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+
+[node name="SafeFrame" type="Control" parent="FrameCenter"]
+custom_minimum_size = Vector2(960, 540)
+layout_mode = 2
+mouse_filter = 1
+
+[node name="ScreenHost" type="Control" parent="FrameCenter/SafeFrame"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Layout" type="VBoxContainer" parent="SafeArea"]
-layout_mode = 2
-theme_override_constants/separation = 18
-
-[node name="Header" type="HBoxContainer" parent="SafeArea/Layout"]
-layout_mode = 2
-
-[node name="TitleGroup" type="VBoxContainer" parent="SafeArea/Layout/Header"]
-layout_mode = 2
-size_flags_horizontal = 3
-
-[node name="Title" type="Label" parent="SafeArea/Layout/Header/TitleGroup"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.97, 0.89, 0.7, 1)
-theme_override_font_sizes/font_size = 34
-text = "方寸牌社"
-
-[node name="Subtitle" type="Label" parent="SafeArea/Layout/Header/TitleGroup"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.55, 0.76, 0.78, 1)
-theme_override_font_sizes/font_size = 15
-text = "离线 · 无充值 · 规则可复现"
-
-[node name="BeanPanel" type="HBoxContainer" parent="SafeArea/Layout/Header"]
-layout_mode = 2
-theme_override_constants/separation = 12
-alignment = 2
-
-[node name="BeanLabel" type="Label" parent="SafeArea/Layout/Header/BeanPanel"]
+[node name="ResolutionBadge" type="Label" parent="FrameCenter/SafeFrame"]
 unique_name_in_owner = true
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.78, 0.32, 1)
-theme_override_font_sizes/font_size = 20
-text = "豆子 3,000"
-vertical_alignment = 1
-
-[node name="SupplyButton" type="Button" parent="SafeArea/Layout/Header/BeanPanel"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(112, 46)
-layout_mode = 2
-theme_override_font_sizes/font_size = 17
-text = "免费补给"
-
-[node name="MainPanel" type="PanelContainer" parent="SafeArea/Layout"]
-layout_mode = 2
-size_flags_vertical = 3
-theme_override_styles/panel = SubResource("StylePanel")
-
-[node name="Content" type="VBoxContainer" parent="SafeArea/Layout/MainPanel"]
-layout_mode = 2
-theme_override_constants/separation = 18
-alignment = 1
-
-[node name="Prompt" type="Label" parent="SafeArea/Layout/MainPanel/Content"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.89, 0.91, 0.88, 1)
-theme_override_font_sizes/font_size = 22
-text = "今晚玩什么？"
-horizontal_alignment = 1
-
-[node name="Modes" type="HBoxContainer" parent="SafeArea/Layout/MainPanel/Content"]
-custom_minimum_size = Vector2(0, 190)
-layout_mode = 2
-theme_override_constants/separation = 24
-alignment = 1
-
-[node name="MahjongButton" type="Button" parent="SafeArea/Layout/MainPanel/Content/Modes"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(330, 170)
-layout_mode = 2
-theme_override_font_sizes/font_size = 28
-theme_override_styles/normal = SubResource("StyleButton")
-text = "麻将\n大众 · 川麻 · 日麻"
-
-[node name="DoudizhuButton" type="Button" parent="SafeArea/Layout/MainPanel/Content/Modes"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(330, 170)
-layout_mode = 2
-theme_override_font_sizes/font_size = 28
-theme_override_styles/normal = SubResource("StyleButtonRed")
-text = "斗地主\n经典叫地主"
-
-[node name="StatusLabel" type="Label" parent="SafeArea/Layout/MainPanel/Content"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 44)
-layout_mode = 2
-theme_override_colors/font_color = Color(0.56, 0.87, 0.81, 1)
-theme_override_font_sizes/font_size = 16
-text = "正在加载规则核心……"
-horizontal_alignment = 1
-vertical_alignment = 1
-autowrap_mode = 2
-
-[node name="Footer" type="Label" parent="SafeArea/Layout"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.45, 0.55, 0.65, 1)
-theme_override_font_sizes/font_size = 13
-text = "M0 工程骨架 · 鼠标与触控共用标准按钮输入"
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -140.0
+offset_top = -19.0
+offset_right = 140.0
+offset_bottom = -3.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.45, 0.61, 0.68, 0.8)
+theme_override_font_sizes/font_size = 11
+text = "逻辑安全区 960×540"
 horizontal_alignment = 1

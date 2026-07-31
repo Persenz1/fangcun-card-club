@@ -13,3 +13,5 @@ cd "$task_project_root"
 "$task_script_dir/dotnet.sh" test FangcunCardClub.sln --no-build
 "$task_script_dir/godot.sh" --headless --editor --path "$task_project_root" --quit
 "$task_script_dir/godot.sh" --headless --path "$task_project_root" --quit-after 2
+"$task_script_dir/godot.sh" --headless --path "$task_project_root" --quit-after 2 -- --preview=doudizhu
+"$task_script_dir/godot.sh" --headless --path "$task_project_root" --quit-after 2 -- --preview=mahjong

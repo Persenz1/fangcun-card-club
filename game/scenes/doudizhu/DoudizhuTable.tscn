@@ -1,0 +1,243 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Texture2D" path="res://game/assets/backgrounds/candidates/bg_doudizhu_night_v001.png" id="1_background"]
+
+[sub_resource type="StyleBoxFlat" id="Seat"]
+bg_color = Color(0.035, 0.065, 0.105, 0.96)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.38, 0.58, 0.64, 0.8)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="CenterPlay"]
+bg_color = Color(0.055, 0.09, 0.13, 0.88)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.53, 0.43, 0.25, 0.8)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="PlayerSeat"]
+bg_color = Color(0.03, 0.22, 0.2, 0.94)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.25, 0.85, 0.7, 0.95)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[node name="DoudizhuTable" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="BackgroundPlate" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("1_background")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="BackButton" type="Button" parent="."]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 20.0
+offset_top = 18.0
+offset_right = 100.0
+offset_bottom = 60.0
+text = "‹ 大厅"
+
+[node name="RoundPanel" type="Panel" parent="."]
+layout_mode = 0
+offset_left = 286.0
+offset_top = 14.0
+offset_right = 674.0
+offset_bottom = 70.0
+
+[node name="RoundInfo" type="Label" parent="RoundPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 12.0
+offset_right = -12.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.98, 0.84, 0.58, 1)
+theme_override_font_sizes/font_size = 17
+text = "豆子 3,000    │    底分 10    │    倍数 1    │    本局 -"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="LeftSeat" type="Panel" parent="."]
+layout_mode = 0
+offset_left = 26.0
+offset_top = 102.0
+offset_right = 154.0
+offset_bottom = 213.0
+theme_override_styles/panel = SubResource("Seat")
+
+[node name="Info" type="Label" parent="LeftSeat"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "对手头像\n\n17 张\n农民"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="RightSeat" type="Panel" parent="."]
+layout_mode = 0
+offset_left = 806.0
+offset_top = 102.0
+offset_right = 934.0
+offset_bottom = 213.0
+theme_override_styles/panel = SubResource("Seat")
+
+[node name="Info" type="Label" parent="RightSeat"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "对手头像\n\n17 张\n农民"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="LastPlay" type="Panel" parent="."]
+layout_mode = 0
+offset_left = 367.0
+offset_top = 188.0
+offset_right = 593.0
+offset_bottom = 282.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("CenterPlay")
+
+[node name="Info" type="Label" parent="LastPlay"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.94, 0.79, 0.56, 1)
+theme_override_font_sizes/font_size = 18
+text = "本轮出牌\n10♠   10♥   10♣\n三张"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="PlayerSeat" type="Panel" parent="."]
+layout_mode = 0
+offset_left = 22.0
+offset_top = 329.0
+offset_right = 99.0
+offset_bottom = 427.0
+theme_override_styles/panel = SubResource("PlayerSeat")
+
+[node name="Info" type="Label" parent="PlayerSeat"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 5.0
+offset_top = 5.0
+offset_right = -5.0
+offset_bottom = -5.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 13
+text = "玩家\n头像\n20 张"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="PlayerHand" type="HBoxContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 106.0
+offset_top = 333.0
+offset_right = 924.0
+offset_bottom = 427.0
+theme_override_constants/separation = -7
+alignment = 1
+
+[node name="StatusLabel" type="Label" parent="."]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 132.0
+offset_top = 428.0
+offset_right = 828.0
+offset_bottom = 456.0
+theme_override_colors/font_color = Color(0.5, 0.86, 0.79, 1)
+theme_override_colors/font_outline_color = Color(0.015, 0.025, 0.035, 0.95)
+theme_override_constants/outline_size = 4
+text = "灰盒演示：点击手牌验证选中状态；这里不判断合法牌型。"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ActionBar" type="HBoxContainer" parent="."]
+layout_mode = 0
+offset_left = 216.0
+offset_top = 462.0
+offset_right = 744.0
+offset_bottom = 516.0
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="AutoButton" type="Button" parent="ActionBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(98, 50)
+layout_mode = 2
+text = "托管：关"
+
+[node name="HintButton" type="Button" parent="ActionBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(98, 50)
+layout_mode = 2
+text = "提示"
+
+[node name="PassButton" type="Button" parent="ActionBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(98, 50)
+layout_mode = 2
+text = "不出"
+
+[node name="PlayButton" type="Button" parent="ActionBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(122, 50)
+layout_mode = 2
+text = "出牌"

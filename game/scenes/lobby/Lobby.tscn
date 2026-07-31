@@ -1,0 +1,242 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Texture2D" path="res://game/assets/backgrounds/candidates/bg_lobby_night_v001.png" id="1_background"]
+
+[sub_resource type="StyleBoxFlat" id="SafeGuide"]
+bg_color = Color(0, 0, 0, 0)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.28, 0.67, 0.64, 0.28)
+
+[sub_resource type="StyleBoxFlat" id="MahjongEntry"]
+bg_color = Color(0.035, 0.27, 0.24, 0.92)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.27, 0.79, 0.68, 0.9)
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
+shadow_color = Color(0, 0, 0, 0.45)
+shadow_size = 10
+
+[sub_resource type="StyleBoxFlat" id="MahjongHover"]
+bg_color = Color(0.045, 0.4, 0.35, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.45, 0.94, 0.78, 1)
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
+
+[sub_resource type="StyleBoxFlat" id="DoudizhuEntry"]
+bg_color = Color(0.39, 0.105, 0.12, 0.94)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.91, 0.39, 0.32, 0.95)
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
+shadow_color = Color(0, 0, 0, 0.45)
+shadow_size = 10
+
+[sub_resource type="StyleBoxFlat" id="DoudizhuHover"]
+bg_color = Color(0.55, 0.14, 0.15, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(1, 0.58, 0.4, 1)
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
+
+[sub_resource type="StyleBoxFlat" id="CharacterPlaceholder"]
+bg_color = Color(0.045, 0.11, 0.14, 0.72)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.31, 0.75, 0.69, 0.72)
+corner_radius_top_left = 84
+corner_radius_top_right = 84
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
+
+[node name="Lobby" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="BackgroundPlate" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("1_background")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="SafeGuide" type="Panel" parent="."]
+layout_mode = 0
+offset_left = 14.0
+offset_top = 12.0
+offset_right = 946.0
+offset_bottom = 528.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("SafeGuide")
+
+[node name="Header" type="Panel" parent="."]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 20.0
+offset_right = 936.0
+offset_bottom = 98.0
+
+[node name="Profile" type="Label" parent="Header"]
+layout_mode = 0
+offset_left = 16.0
+offset_top = 10.0
+offset_right = 360.0
+offset_bottom = 68.0
+theme_override_colors/font_color = Color(0.97, 0.86, 0.59, 1)
+theme_override_font_sizes/font_size = 19
+text = "□ 牌社访客    ★ 1级\n     角色头像与成长栏占位"
+
+[node name="BeanLabel" type="Label" parent="Header"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 652.0
+offset_top = 17.0
+offset_right = 770.0
+offset_bottom = 49.0
+theme_override_colors/font_color = Color(1, 0.75, 0.28, 1)
+theme_override_font_sizes/font_size = 18
+text = "豆子 3,000"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="SupplyButton" type="Button" parent="Header"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 782.0
+offset_top = 10.0
+offset_right = 898.0
+offset_bottom = 56.0
+text = "免费补给"
+
+[node name="MahjongEntryButton" type="Button" parent="."]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 54.0
+offset_top = 158.0
+offset_right = 354.0
+offset_bottom = 376.0
+theme_override_colors/font_color = Color(0.96, 0.92, 0.72, 1)
+theme_override_font_sizes/font_size = 25
+theme_override_styles/normal = SubResource("MahjongEntry")
+theme_override_styles/hover = SubResource("MahjongHover")
+text = "麻将\n\n大众 · 四川血战 · 日式立直\n\n进入牌桌"
+
+[node name="DoudizhuEntryButton" type="Button" parent="."]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 606.0
+offset_top = 158.0
+offset_right = 906.0
+offset_bottom = 376.0
+theme_override_colors/font_color = Color(1, 0.9, 0.68, 1)
+theme_override_font_sizes/font_size = 25
+theme_override_styles/normal = SubResource("DoudizhuEntry")
+theme_override_styles/hover = SubResource("DoudizhuHover")
+text = "斗地主\n\n经典三人叫地主 · 无癞子\n\n进入牌桌"
+
+[node name="CharacterPlaceholder" type="Panel" parent="."]
+layout_mode = 0
+offset_left = 390.0
+offset_top = 118.0
+offset_right = 570.0
+offset_bottom = 408.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("CharacterPlaceholder")
+
+[node name="Label" type="Label" parent="CharacterPlaceholder"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 12.0
+offset_top = 12.0
+offset_right = -12.0
+offset_bottom = -12.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.48, 0.78, 0.73, 0.9)
+theme_override_font_sizes/font_size = 17
+text = "人物占位\n\n后续独立替换\n不进入背景图"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="StatusLabel" type="Label" parent="."]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 184.0
+offset_top = 415.0
+offset_right = 776.0
+offset_bottom = 449.0
+theme_override_colors/font_color = Color(0.55, 0.86, 0.8, 1)
+theme_override_colors/font_outline_color = Color(0.015, 0.025, 0.035, 0.95)
+theme_override_constants/outline_size = 4
+text = "请选择玩法；当前画面使用模拟数据验证构图和触控区域。"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="BottomNav" type="HBoxContainer" parent="."]
+layout_mode = 0
+offset_left = 304.0
+offset_top = 458.0
+offset_right = 656.0
+offset_bottom = 510.0
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="CharactersButton" type="Button" parent="BottomNav"]
+custom_minimum_size = Vector2(76, 48)
+layout_mode = 2
+text = "人物"
+disabled = true
+
+[node name="RecordsButton" type="Button" parent="BottomNav"]
+custom_minimum_size = Vector2(76, 48)
+layout_mode = 2
+text = "战绩"
+disabled = true
+
+[node name="GuideButton" type="Button" parent="BottomNav"]
+custom_minimum_size = Vector2(76, 48)
+layout_mode = 2
+text = "规则"
+disabled = true
+
+[node name="SettingsButton" type="Button" parent="BottomNav"]
+custom_minimum_size = Vector2(76, 48)
+layout_mode = 2
+text = "设置"
+disabled = true

@@ -26,9 +26,14 @@ while IFS= read -r task_naked_doc; do
   task_fail "Markdown files may not live directly under docs/: $task_naked_doc"
 done < <(find docs -maxdepth 1 -type f -name '*.md' ! -name 'README.md' -print)
 
-for task_category in product architecture rules platforms art tasks templates; do
+for task_category in product architecture rules platforms art prompts tasks templates; do
   [[ -f "docs/$task_category/README.md" ]] || task_fail "missing docs/$task_category/README.md"
   rg -Fq "$task_category/README.md" docs/README.md || task_fail "docs/README.md does not index $task_category"
+done
+
+for task_prompt_category in backgrounds ui characters; do
+  [[ -f "docs/prompts/$task_prompt_category/README.md" ]] || task_fail "missing docs/prompts/$task_prompt_category/README.md"
+  rg -Fq "$task_prompt_category/README.md" docs/prompts/README.md || task_fail "docs/prompts/README.md does not index $task_prompt_category"
 done
 
 mapfile -t task_records < <(

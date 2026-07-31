@@ -1,0 +1,288 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Texture2D" path="res://game/assets/backgrounds/candidates/bg_mahjong_night_v001.png" id="1_background"]
+
+[sub_resource type="StyleBoxFlat" id="Seat"]
+bg_color = Color(0.035, 0.065, 0.105, 0.96)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.38, 0.58, 0.64, 0.8)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="Center"]
+bg_color = Color(0.025, 0.07, 0.1, 0.92)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.78, 0.56, 0.2, 0.85)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[sub_resource type="StyleBoxFlat" id="PlayerSeat"]
+bg_color = Color(0.03, 0.22, 0.2, 0.94)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.25, 0.85, 0.7, 0.95)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[node name="MahjongTable" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="BackgroundPlate" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("1_background")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="BackButton" type="Button" parent="."]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 18.0
+offset_top = 16.0
+offset_right = 98.0
+offset_bottom = 58.0
+text = "‹ 大厅"
+
+[node name="RoundPanel" type="Panel" parent="."]
+layout_mode = 0
+offset_left = 346.0
+offset_top = 12.0
+offset_right = 614.0
+offset_bottom = 62.0
+
+[node name="Info" type="Label" parent="RoundPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.98, 0.84, 0.58, 1)
+theme_override_font_sizes/font_size = 17
+text = "东一局   本场 0   余牌 69"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="TopSeat" type="Panel" parent="."]
+layout_mode = 0
+offset_left = 355.0
+offset_top = 65.0
+offset_right = 605.0
+offset_bottom = 124.0
+theme_override_styles/panel = SubResource("Seat")
+
+[node name="Info" type="Label" parent="TopSeat"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 13
+text = "对家头像  25,000\n□□□□□□□□□□□□□"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="LeftSeat" type="Panel" parent="."]
+layout_mode = 0
+offset_left = 16.0
+offset_top = 190.0
+offset_right = 141.0
+offset_bottom = 280.0
+theme_override_styles/panel = SubResource("Seat")
+
+[node name="Info" type="Label" parent="LeftSeat"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 13
+text = "上家头像\n25,000\n□ □ □ □ □ □"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="RightSeat" type="Panel" parent="."]
+layout_mode = 0
+offset_left = 819.0
+offset_top = 190.0
+offset_right = 944.0
+offset_bottom = 280.0
+theme_override_styles/panel = SubResource("Seat")
+
+[node name="Info" type="Label" parent="RightSeat"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 13
+text = "下家头像\n25,000\n□ □ □ □ □ □"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CenterConsole" type="Panel" parent="."]
+layout_mode = 0
+offset_left = 394.0
+offset_top = 185.0
+offset_right = 566.0
+offset_bottom = 302.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("Center")
+
+[node name="Info" type="Label" parent="CenterConsole"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.92, 0.76, 0.43, 1)
+text = "东\n剩余 69\n一向听"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="RiverGuide" type="Label" parent="."]
+layout_mode = 0
+offset_left = 282.0
+offset_top = 304.0
+offset_right = 678.0
+offset_bottom = 362.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.78, 0.84, 0.7, 0.55)
+text = "牌河布局预留\n🀇  🀈  🀉      🀙  🀚  🀛      🀀  🀁"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="PlayerSeat" type="Panel" parent="."]
+layout_mode = 0
+offset_left = 20.0
+offset_top = 377.0
+offset_right = 111.0
+offset_bottom = 458.0
+theme_override_styles/panel = SubResource("PlayerSeat")
+
+[node name="Info" type="Label" parent="PlayerSeat"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 13
+text = "玩家头像\n25,000\n庄家"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="PlayerTiles" type="HBoxContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 124.0
+offset_top = 378.0
+offset_right = 854.0
+offset_bottom = 454.0
+theme_override_constants/separation = 3
+alignment = 1
+
+[node name="StatusLabel" type="Label" parent="."]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 116.0
+offset_top = 448.0
+offset_right = 844.0
+offset_bottom = 476.0
+theme_override_colors/font_color = Color(0.52, 0.88, 0.79, 1)
+theme_override_colors/font_outline_color = Color(0.015, 0.025, 0.035, 0.95)
+theme_override_constants/outline_size = 4
+text = "灰盒演示：点击牌面验证选中状态；向听与进张暂用模拟文案。"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="UtilityBar" type="HBoxContainer" parent="."]
+layout_mode = 0
+offset_left = 18.0
+offset_top = 478.0
+offset_right = 226.0
+offset_bottom = 518.0
+theme_override_constants/separation = 8
+
+[node name="HintButton" type="Button" parent="UtilityBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(96, 42)
+layout_mode = 2
+text = "提示"
+
+[node name="AutoButton" type="Button" parent="UtilityBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(96, 42)
+layout_mode = 2
+text = "托管：关"
+
+[node name="ActionBar" type="HBoxContainer" parent="."]
+layout_mode = 0
+offset_left = 448.0
+offset_top = 478.0
+offset_right = 942.0
+offset_bottom = 518.0
+theme_override_constants/separation = 8
+alignment = 2
+
+[node name="ChowButton" type="Button" parent="ActionBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(64, 42)
+layout_mode = 2
+text = "吃"
+
+[node name="PongButton" type="Button" parent="ActionBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(64, 42)
+layout_mode = 2
+text = "碰"
+
+[node name="KongButton" type="Button" parent="ActionBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(64, 42)
+layout_mode = 2
+text = "杠"
+
+[node name="WinButton" type="Button" parent="ActionBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(72, 42)
+layout_mode = 2
+text = "和牌"
+
+[node name="SkipButton" type="Button" parent="ActionBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(72, 42)
+layout_mode = 2
+text = "跳过"
