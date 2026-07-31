@@ -13,6 +13,7 @@
 - 16:9 核心安全区与 20:9 手机宽屏延展策略
 - 按背景、交互 UI 和人物分类的美术提示词库
 - 已接入大厅、斗地主和麻将三张深夜主题背景候选
+- 麻将采用 2D 桌面背景与透明 3D 麻将牌层的固定视角原型
 - 可替换角色与背景主题定义
 - Windows x64 导出链路
 - 强制任务留档和目录同步检查
@@ -57,7 +58,10 @@ fangcun-card-club/
 ├── docs/
 │   ├── README.md                   # 文档总索引与维护规则
 │   ├── product/README.md           # 产品定义与路线图
-│   ├── architecture/               # 系统架构与程序规划
+│   ├── architecture/
+│   │   ├── README.md               # 架构文档索引
+│   │   ├── 程序实现规划.md         # 分层、模块与里程碑
+│   │   └── 麻将混合渲染.md         # 2D 桌面与透明 3D 牌层
 │   ├── rules/README.md             # 玩法规则与固定牌例
 │   ├── platforms/                  # 平台适配和发布约束
 │   ├── art/                        # 美术资产约定与界面背景规格
@@ -76,7 +80,9 @@ fangcun-card-club/
 │   │   ├── lobby/                  # 大厅交互灰盒
 │   │   ├── doudizhu/               # 斗地主桌面交互灰盒
 │   │   └── mahjong/                # 四人麻将桌面交互灰盒
-│   └── scripts/                    # Godot 表现层 C# 脚本
+│   └── scripts/
+│       ├── mahjong/                # 麻将桌面标定、透明 3D 牌层与交互
+│       └── Bootstrap.cs            # 灰盒入口与界面联动
 ├── scripts/
 │   ├── bootstrap-env.sh            # 安装项目本地工具链
 │   ├── check-docs.sh               # 文档治理检查

@@ -7,13 +7,15 @@
 | 分类 | 用途 | 入口 |
 | --- | --- | --- |
 | 产品 | 产品定义、范围、路线图和体验目标 | [product/README.md](product/README.md) |
-| 架构 | 系统分层、模块边界、数据流和技术方案 | [architecture/README.md](architecture/README.md) |
+| 架构 | 系统分层、模块边界、数据流和 2D/3D 技术方案 | [architecture/README.md](architecture/README.md) |
 | 规则 | 斗地主、麻将规则冻结与牌例 | [rules/README.md](rules/README.md) |
 | 平台 | Windows、Android 等平台适配与发布 | [platforms/README.md](platforms/README.md) |
 | 美术 | 资产规格、内容包约定和美术流程 | [art/README.md](art/README.md) |
 | 提示词 | 按美术资产类型维护的生成提示词 | [prompts/README.md](prompts/README.md) |
 | 任务档案 | 每个工程任务的目标、改动、验证和遗留项 | [tasks/README.md](tasks/README.md) |
 | 模板 | 新文档和任务记录的标准模板 | [templates/README.md](templates/README.md) |
+
+近期新增设计：[麻将混合渲染](architecture/麻将混合渲染.md)。
 
 ## 强制维护规则
 

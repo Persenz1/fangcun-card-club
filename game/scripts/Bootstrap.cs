@@ -1,3 +1,4 @@
+using FangcunCardClub.Game.Mahjong;
 using Game.Core.Random;
 using Game.Doudizhu.Cards;
 using Godot;
@@ -129,43 +130,30 @@ public partial class Bootstrap : Control
     private void ShowMahjong()
     {
         var table = ChangeScreen(MahjongScenePath);
-        var hand = table.GetNode<HBoxContainer>("%PlayerTiles");
+        var board = table.GetNode<MahjongBoard3D>("%MahjongBoard3D");
+        var tableGuide = table.GetNode<Control>("%TableGuide");
         var status = table.GetNode<Label>("%StatusLabel");
-        var tileButtons = new List<Button>();
-        string[] tiles = ["二万", "三万", "三万", "四万", "五筒", "六筒", "七筒", "八筒", "三条", "四条", "五条", "东", "发", "中"];
 
-        foreach (var tile in tiles)
+        board.PlayerTileSelected += (tileIndex, displayName) =>
         {
-            var button = CreatePieceButton(tile.Replace("万", "\n万").Replace("筒", "\n筒").Replace("条", "\n条"), new Vector2(43, 72));
-            button.TooltipText = tile;
-            button.AddThemeColorOverride("font_color", tile is "中" or "发" ? new Color("9c3030") : new Color("17342d"));
-            button.AddThemeColorOverride("font_pressed_color", new Color("102521"));
-            button.Toggled += selected =>
-            {
-                if (selected)
-                {
-                    foreach (var other in tileButtons.Where(other => other != button))
-                    {
-                        other.ButtonPressed = false;
-                    }
-                }
-
-                status.Text = selected
-                    ? $"已选择 {tile}；舍牌合法性与向听变化以后由麻将规则层提供。"
-                    : "未选择牌；灰盒只验证点击尺寸和排列密度。";
-            };
-
-            tileButtons.Add(button);
-            hand.AddChild(button);
-        }
+            status.Text = tileIndex >= 0
+                ? $"已选择 {displayName}；3D 层只上抬牌，合法性以后由麻将规则层提供。"
+                : "未选择牌；点击 3D 手牌可以切换选中状态。";
+        };
 
         table.GetNode<Button>("%BackButton").Pressed += ShowLobby;
         table.GetNode<Button>("%HintButton").Pressed += () =>
         {
-            tileButtons[7].ButtonPressed = true;
+            board.SelectPlayerTile(7);
             status.Text = "提示占位：推荐打八筒；正式版本同时显示向听数和进张。";
         };
         BindAutoButton(table.GetNode<Button>("%AutoButton"), status);
+        var guideButton = table.GetNode<Button>("%GuideButton");
+        guideButton.Pressed += () =>
+        {
+            tableGuide.Visible = !tableGuide.Visible;
+            guideButton.Text = tableGuide.Visible ? "标线：开" : "标线：关";
+        };
         BindMahjongAction(table, "%ChowButton", "吃");
         BindMahjongAction(table, "%PongButton", "碰");
         BindMahjongAction(table, "%KongButton", "杠");

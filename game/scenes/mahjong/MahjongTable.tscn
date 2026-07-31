@@ -1,6 +1,9 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=8 format=3]
 
 [ext_resource type="Texture2D" path="res://game/assets/backgrounds/candidates/bg_mahjong_night_v001.png" id="1_background"]
+[ext_resource type="Script" path="res://game/scripts/mahjong/MahjongBoard3D.cs" id="2_board"]
+[ext_resource type="Script" path="res://game/scripts/mahjong/Mahjong3DLayer.cs" id="3_layer"]
+[ext_resource type="Script" path="res://game/scripts/mahjong/MahjongTableGuide.cs" id="4_guide"]
 
 [sub_resource type="StyleBoxFlat" id="Seat"]
 bg_color = Color(0.035, 0.065, 0.105, 0.96)
@@ -58,6 +61,48 @@ texture = ExtResource("1_background")
 expand_mode = 1
 stretch_mode = 6
 
+[node name="TableGuide" type="Control" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("4_guide")
+
+[node name="Mahjong3DLayer" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+script = ExtResource("3_layer")
+
+[node name="BoardViewport" type="SubViewport" parent="Mahjong3DLayer"]
+transparent_bg = true
+size = Vector2i(960, 540)
+render_target_update_mode = 4
+physics_object_picking = true
+
+[node name="MahjongBoard3D" type="Node3D" parent="Mahjong3DLayer/BoardViewport"]
+unique_name_in_owner = true
+script = ExtResource("2_board")
+
+[node name="BoardTexture" type="TextureRect" parent="Mahjong3DLayer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 0
+
 [node name="BackButton" type="Button" parent="."]
 unique_name_in_owner = true
 layout_mode = 0
@@ -103,7 +148,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_font_sizes/font_size = 13
-text = "对家头像  25,000\n□□□□□□□□□□□□□"
+text = "对家头像\n25,000"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -123,7 +168,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_font_sizes/font_size = 13
-text = "上家头像\n25,000\n□ □ □ □ □ □"
+text = "上家头像\n25,000"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -143,16 +188,16 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_font_sizes/font_size = 13
-text = "下家头像\n25,000\n□ □ □ □ □ □"
+text = "下家头像\n25,000"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="CenterConsole" type="Panel" parent="."]
 layout_mode = 0
-offset_left = 394.0
-offset_top = 185.0
-offset_right = 566.0
-offset_bottom = 302.0
+offset_left = 420.0
+offset_top = 180.0
+offset_right = 540.0
+offset_bottom = 275.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("Center")
 
@@ -168,19 +213,8 @@ offset_bottom = -8.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_colors/font_color = Color(0.92, 0.76, 0.43, 1)
+theme_override_font_sizes/font_size = 13
 text = "东\n剩余 69\n一向听"
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="RiverGuide" type="Label" parent="."]
-layout_mode = 0
-offset_left = 282.0
-offset_top = 304.0
-offset_right = 678.0
-offset_bottom = 362.0
-mouse_filter = 2
-theme_override_colors/font_color = Color(0.78, 0.84, 0.7, 0.55)
-text = "牌河布局预留\n🀇  🀈  🀉      🀙  🀚  🀛      🀀  🀁"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -204,16 +238,6 @@ text = "玩家头像\n25,000\n庄家"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="PlayerTiles" type="HBoxContainer" parent="."]
-unique_name_in_owner = true
-layout_mode = 0
-offset_left = 124.0
-offset_top = 378.0
-offset_right = 854.0
-offset_bottom = 454.0
-theme_override_constants/separation = 3
-alignment = 1
-
 [node name="StatusLabel" type="Label" parent="."]
 unique_name_in_owner = true
 layout_mode = 0
@@ -232,7 +256,7 @@ vertical_alignment = 1
 layout_mode = 0
 offset_left = 18.0
 offset_top = 478.0
-offset_right = 226.0
+offset_right = 330.0
 offset_bottom = 518.0
 theme_override_constants/separation = 8
 
@@ -247,6 +271,12 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(96, 42)
 layout_mode = 2
 text = "托管：关"
+
+[node name="GuideButton" type="Button" parent="UtilityBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(96, 42)
+layout_mode = 2
+text = "标线：开"
 
 [node name="ActionBar" type="HBoxContainer" parent="."]
 layout_mode = 0
