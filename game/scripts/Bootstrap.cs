@@ -1,6 +1,6 @@
+using FangcunCardClub.Game.Doudizhu;
 using FangcunCardClub.Game.Mahjong;
-using Game.Core.Random;
-using Game.Doudizhu.Cards;
+using Game.Application.Profiles;
 using Godot;
 
 namespace FangcunCardClub.Game;
@@ -10,14 +10,11 @@ public partial class Bootstrap : Control
     private const string LobbyScenePath = "res://game/scenes/lobby/Lobby.tscn";
     private const string DoudizhuScenePath = "res://game/scenes/doudizhu/DoudizhuTable.tscn";
     private const string MahjongScenePath = "res://game/scenes/mahjong/MahjongTable.tscn";
-    private const ulong PreviewSeed = 20260801;
-
-    private readonly Color _pieceBackground = new("f1e5cc");
-    private readonly Color _pieceBorder = new("6d6257");
-    private readonly Color _pieceHover = new("fff5dc");
-    private readonly Color _pieceSelected = new("4fc8ad");
-
     private Control? _currentScreen;
+    private bool _doudizhuAutoPlay;
+    private double _doudizhuTurnDelaySeconds = 0.42;
+    private LocalPlayerProfile _profile = null!;
+    private JsonProfileStore? _profileStore;
     private Label _resolutionBadge = null!;
     private Control _screenHost = null!;
 
@@ -29,7 +26,24 @@ public partial class Bootstrap : Control
         GetViewport().SizeChanged += UpdateResolutionBadge;
         UpdateResolutionBadge();
 
-        var previewArgument = OS.GetCmdlineUserArgs().FirstOrDefault(argument => argument.StartsWith("--preview=", StringComparison.Ordinal));
+        var userArguments = OS.GetCmdlineUserArgs();
+        var previewArgument = userArguments.FirstOrDefault(argument => argument.StartsWith("--preview=", StringComparison.Ordinal));
+        _doudizhuAutoPlay = userArguments.Contains("--autoplay", StringComparer.Ordinal);
+        if (userArguments.Contains("--fast-autoplay", StringComparer.Ordinal))
+        {
+            _doudizhuTurnDelaySeconds = 0.01;
+        }
+        if (previewArgument is null)
+        {
+            var profilePath = ProjectSettings.GlobalizePath("user://profile-v1.json");
+            _profileStore = new JsonProfileStore(profilePath);
+            _profile = _profileStore.Load();
+        }
+        else
+        {
+            _profile = new LocalPlayerProfile();
+        }
+
         switch (previewArgument)
         {
             case "--preview=doudizhu":
@@ -54,77 +68,48 @@ public partial class Bootstrap : Control
         var lobby = ChangeScreen(LobbyScenePath);
         var status = lobby.GetNode<Label>("%StatusLabel");
         var beanLabel = lobby.GetNode<Label>("%BeanLabel");
+        var supplyButton = lobby.GetNode<Button>("%SupplyButton");
+        var doudizhuButton = lobby.GetNode<Button>("%DoudizhuEntryButton");
 
-        lobby.GetNode<Button>("%DoudizhuEntryButton").Pressed += ShowDoudizhu;
+        var needsSupply = LocalProfileEconomy.CanClaimFreeSupply(_profile);
+        beanLabel.Text = $"豆子 {_profile.Beans:N0}";
+        supplyButton.Disabled = !needsSupply;
+        supplyButton.Text = supplyButton.Disabled ? "豆子充足" : "免费补给";
+        doudizhuButton.Disabled = needsSupply && _profile.ActiveDoudizhu is null;
+        doudizhuButton.Text = _profile.ActiveDoudizhu is not null
+            ? "斗地主\n\n检测到未完成牌局\n\n继续游戏"
+            : needsSupply
+                ? "斗地主\n\n豆子不足\n\n请先免费补给"
+                : "斗地主\n\n经典三人叫地主 · 无癞子\n\n开始游戏";
+
+        doudizhuButton.Pressed += ShowDoudizhu;
         lobby.GetNode<Button>("%MahjongEntryButton").Pressed += ShowMahjong;
-        lobby.GetNode<Button>("%SupplyButton").Pressed += () =>
+        supplyButton.Pressed += () =>
         {
-            beanLabel.Text = "豆子 3,000";
-            status.Text = "免费补给完成：无广告、无等待、无次数限制。";
+            if (LocalProfileEconomy.ClaimFreeSupply(_profile))
+            {
+                SaveProfile();
+                beanLabel.Text = $"豆子 {_profile.Beans:N0}";
+                supplyButton.Disabled = true;
+                supplyButton.Text = "豆子充足";
+                status.Text = "免费补给完成：无广告、无等待、无次数限制。";
+            }
         };
 
-        var previewDeck = CardDeck.CreateShuffled(new SplitMix64Random(PreviewSeed));
-        status.Text = $"布局骨架已加载｜固定种子牌堆：{string.Join(" · ", previewDeck.Take(3).Select(FormatCard))}";
+        status.Text = _profile.ActiveDoudizhu is null
+            ? $"斗地主战绩：{_profile.DoudizhuStatistics.GamesWon} 胜 / {_profile.DoudizhuStatistics.GamesPlayed} 局。"
+            : "上次斗地主牌局已保存，进入后从原进度继续。";
     }
 
     private void ShowDoudizhu()
     {
-        var table = ChangeScreen(DoudizhuScenePath);
-        var hand = table.GetNode<HBoxContainer>("%PlayerHand");
-        var status = table.GetNode<Label>("%StatusLabel");
-        var cardButtons = new List<Button>();
-
-        var cards = CardDeck.CreateShuffled(new SplitMix64Random(PreviewSeed))
-            .Take(20)
-            .OrderByDescending(card => card.Rank)
-            .ThenBy(card => card.Suit);
-
-        foreach (var card in cards)
-        {
-            var button = CreatePieceButton(FormatCardFace(card), new Vector2(45, 88));
-            button.TooltipText = FormatCard(card);
-            button.AddThemeColorOverride("font_color", IsRed(card) ? new Color("9c3030") : new Color("18202a"));
-            button.AddThemeColorOverride("font_pressed_color", new Color("102521"));
-            button.Toggled += _ =>
-            {
-                var selectedCount = cardButtons.Count(candidate => candidate.ButtonPressed);
-                status.Text = selectedCount == 0
-                    ? "未选择手牌。灰盒只演示交互，不在表现层判断牌型。"
-                    : $"已选择 {selectedCount} 张牌；合法性以后由斗地主规则层提供。";
-            };
-
-            cardButtons.Add(button);
-            hand.AddChild(button);
-        }
-
-        table.GetNode<Button>("%BackButton").Pressed += ShowLobby;
-        table.GetNode<Button>("%HintButton").Pressed += () =>
-        {
-            foreach (var button in cardButtons)
-            {
-                button.ButtonPressed = false;
-            }
-
-            foreach (var button in cardButtons.Take(3))
-            {
-                button.ButtonPressed = true;
-            }
-
-            status.Text = "提示占位：规则层将返回合法方案，界面只负责高亮结果。";
-        };
-        table.GetNode<Button>("%PassButton").Pressed += () =>
-        {
-            ClearSelection(cardButtons);
-            status.Text = "不出演示：等待规则层接受命令后再播放过场。";
-        };
-        table.GetNode<Button>("%PlayButton").Pressed += () =>
-        {
-            var selectedCount = cardButtons.Count(button => button.ButtonPressed);
-            status.Text = selectedCount == 0
-                ? "请先选择手牌。"
-                : $"出牌按钮命中：提交 {selectedCount} 张牌的玩家意图，不在界面计算牌型。";
-        };
-        BindAutoButton(table.GetNode<Button>("%AutoButton"), status);
+        var table = (DoudizhuTableController)ChangeScreen(DoudizhuScenePath);
+        table.Initialize(
+            _profile,
+            SaveProfile,
+            ShowLobby,
+            _doudizhuAutoPlay,
+            _doudizhuTurnDelaySeconds);
     }
 
     private void ShowMahjong()
@@ -172,41 +157,6 @@ public partial class Bootstrap : Control
         return scene;
     }
 
-    private Button CreatePieceButton(string text, Vector2 minimumSize)
-    {
-        var button = new Button
-        {
-            Text = text,
-            CustomMinimumSize = minimumSize,
-            ToggleMode = true,
-            FocusMode = FocusModeEnum.All,
-        };
-
-        button.AddThemeFontSizeOverride("font_size", 16);
-        button.AddThemeStyleboxOverride("normal", CreatePieceStyle(_pieceBackground, _pieceBorder));
-        button.AddThemeStyleboxOverride("hover", CreatePieceStyle(_pieceHover, new Color("d3a84a")));
-        button.AddThemeStyleboxOverride("pressed", CreatePieceStyle(_pieceSelected, new Color("b9f3dc")));
-        button.AddThemeStyleboxOverride("focus", CreatePieceStyle(new Color(0, 0, 0, 0), new Color("f2bd55")));
-        return button;
-    }
-
-    private static StyleBoxFlat CreatePieceStyle(Color background, Color border)
-    {
-        return new StyleBoxFlat
-        {
-            BgColor = background,
-            BorderColor = border,
-            BorderWidthLeft = 2,
-            BorderWidthTop = 2,
-            BorderWidthRight = 2,
-            BorderWidthBottom = 2,
-            CornerRadiusTopLeft = 5,
-            CornerRadiusTopRight = 5,
-            CornerRadiusBottomRight = 5,
-            CornerRadiusBottomLeft = 5,
-        };
-    }
-
     private static void BindAutoButton(Button button, Label status)
     {
         var enabled = false;
@@ -229,59 +179,14 @@ public partial class Bootstrap : Control
         };
     }
 
-    private static void ClearSelection(IEnumerable<Button> buttons)
-    {
-        foreach (var button in buttons)
-        {
-            button.ButtonPressed = false;
-        }
-    }
-
     private void UpdateResolutionBadge()
     {
         var windowSize = DisplayServer.WindowGetSize();
         _resolutionBadge.Text = $"安全区 960×540｜窗口 {windowSize.X}×{windowSize.Y}";
     }
 
-    private static bool IsRed(Card card)
+    private void SaveProfile()
     {
-        return card.Suit is CardSuit.Diamonds or CardSuit.Hearts || card.Rank == CardRank.BigJoker;
-    }
-
-    private static string FormatCard(Card card)
-    {
-        return card.IsJoker ? FormatRank(card.Rank) : $"{FormatRank(card.Rank)}{FormatSuit(card.Suit)}";
-    }
-
-    private static string FormatCardFace(Card card)
-    {
-        return card.IsJoker ? FormatRank(card.Rank).Replace("王", "\n王") : $"{FormatRank(card.Rank)}\n{FormatSuit(card.Suit)}";
-    }
-
-    private static string FormatRank(CardRank rank)
-    {
-        return rank switch
-        {
-            CardRank.Jack => "J",
-            CardRank.Queen => "Q",
-            CardRank.King => "K",
-            CardRank.Ace => "A",
-            CardRank.Two => "2",
-            CardRank.SmallJoker => "小王",
-            CardRank.BigJoker => "大王",
-            _ => ((int)rank).ToString(),
-        };
-    }
-
-    private static string FormatSuit(CardSuit suit)
-    {
-        return suit switch
-        {
-            CardSuit.Clubs => "♣",
-            CardSuit.Diamonds => "♦",
-            CardSuit.Hearts => "♥",
-            CardSuit.Spades => "♠",
-            _ => string.Empty,
-        };
+        _profileStore?.Save(_profile);
     }
 }

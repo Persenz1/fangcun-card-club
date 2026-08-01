@@ -1,6 +1,7 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="Texture2D" path="res://game/assets/backgrounds/candidates/bg_doudizhu_night_v001.png" id="1_background"]
+[ext_resource type="Script" path="res://game/scripts/doudizhu/DoudizhuTableController.cs" id="2_controller"]
 
 [sub_resource type="StyleBoxFlat" id="Seat"]
 bg_color = Color(0.035, 0.065, 0.105, 0.96)
@@ -38,6 +39,20 @@ corner_radius_top_right = 8
 corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
 
+[sub_resource type="StyleBoxFlat" id="ResultPanel"]
+bg_color = Color(0.025, 0.055, 0.08, 0.98)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.9, 0.62, 0.27, 0.96)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+shadow_color = Color(0, 0, 0, 0.65)
+shadow_size = 16
+
 [node name="DoudizhuTable" type="Control"]
 layout_mode = 3
 anchors_preset = 15
@@ -45,6 +60,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("2_controller")
 
 [node name="BackgroundPlate" type="TextureRect" parent="."]
 layout_mode = 1
@@ -75,6 +91,7 @@ offset_right = 674.0
 offset_bottom = 70.0
 
 [node name="RoundInfo" type="Label" parent="RoundPanel"]
+unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -97,7 +114,8 @@ offset_right = 154.0
 offset_bottom = 213.0
 theme_override_styles/panel = SubResource("Seat")
 
-[node name="Info" type="Label" parent="LeftSeat"]
+[node name="LeftSeatInfo" type="Label" parent="LeftSeat"]
+unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -120,7 +138,8 @@ offset_right = 934.0
 offset_bottom = 213.0
 theme_override_styles/panel = SubResource("Seat")
 
-[node name="Info" type="Label" parent="RightSeat"]
+[node name="RightSeatInfo" type="Label" parent="RightSeat"]
+unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -135,16 +154,31 @@ text = "对手头像\n\n17 张\n农民"
 horizontal_alignment = 1
 vertical_alignment = 1
 
+[node name="BottomCardsLabel" type="Label" parent="."]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 266.0
+offset_top = 77.0
+offset_right = 694.0
+offset_bottom = 108.0
+theme_override_colors/font_color = Color(0.91, 0.76, 0.49, 1)
+theme_override_colors/font_outline_color = Color(0.015, 0.025, 0.035, 0.95)
+theme_override_constants/outline_size = 4
+text = "底牌：叫地主后公开"
+horizontal_alignment = 1
+vertical_alignment = 1
+
 [node name="LastPlay" type="Panel" parent="."]
 layout_mode = 0
-offset_left = 367.0
+offset_left = 260.0
 offset_top = 188.0
-offset_right = 593.0
+offset_right = 700.0
 offset_bottom = 282.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("CenterPlay")
 
-[node name="Info" type="Label" parent="LastPlay"]
+[node name="LastPlayInfo" type="Label" parent="LastPlay"]
+unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -156,7 +190,7 @@ offset_bottom = -8.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_colors/font_color = Color(0.94, 0.79, 0.56, 1)
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 16
 text = "本轮出牌\n10♠   10♥   10♣\n三张"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -169,7 +203,8 @@ offset_right = 99.0
 offset_bottom = 427.0
 theme_override_styles/panel = SubResource("PlayerSeat")
 
-[node name="Info" type="Label" parent="PlayerSeat"]
+[node name="PlayerSeatInfo" type="Label" parent="PlayerSeat"]
+unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -210,6 +245,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="ActionBar" type="HBoxContainer" parent="."]
+unique_name_in_owner = true
 layout_mode = 0
 offset_left = 216.0
 offset_top = 462.0
@@ -241,3 +277,81 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(122, 50)
 layout_mode = 2
 text = "出牌"
+
+[node name="BidActionBar" type="HBoxContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 360.0
+offset_top = 284.0
+offset_right = 600.0
+offset_bottom = 332.0
+theme_override_constants/separation = 14
+alignment = 1
+
+[node name="BidPassButton" type="Button" parent="BidActionBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(104, 48)
+layout_mode = 2
+text = "不叫"
+
+[node name="CallButton" type="Button" parent="BidActionBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(104, 48)
+layout_mode = 2
+text = "叫地主"
+
+[node name="ResultOverlay" type="Panel" parent="."]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+offset_left = 244.0
+offset_top = 117.0
+offset_right = 716.0
+offset_bottom = 421.0
+theme_override_styles/panel = SubResource("ResultPanel")
+
+[node name="ResultTitle" type="Label" parent="ResultOverlay"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 24.0
+offset_top = 24.0
+offset_right = 448.0
+offset_bottom = 70.0
+theme_override_colors/font_color = Color(1, 0.79, 0.35, 1)
+theme_override_font_sizes/font_size = 28
+text = "本局胜利"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ResultDetails" type="Label" parent="ResultOverlay"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 30.0
+offset_top = 82.0
+offset_right = 442.0
+offset_bottom = 200.0
+theme_override_font_sizes/font_size = 18
+text = "地主获胜｜无春天加倍\n最终倍数 ×1｜本局 +20 豆\n当前豆子 3,020｜战绩 1/1"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ResultActions" type="HBoxContainer" parent="ResultOverlay"]
+layout_mode = 0
+offset_left = 94.0
+offset_top = 222.0
+offset_right = 378.0
+offset_bottom = 278.0
+theme_override_constants/separation = 16
+alignment = 1
+
+[node name="ResultLobbyButton" type="Button" parent="ResultOverlay/ResultActions"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(126, 52)
+layout_mode = 2
+text = "返回大厅"
+
+[node name="RematchButton" type="Button" parent="ResultOverlay/ResultActions"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(126, 52)
+layout_mode = 2
+text = "再来一局"
