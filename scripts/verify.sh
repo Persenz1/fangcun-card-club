@@ -16,3 +16,4 @@ cd "$task_project_root"
 "$task_script_dir/godot.sh" --headless --path "$task_project_root" --quit-after 2 -- --preview=doudizhu
 "$task_script_dir/godot.sh" --headless --path "$task_project_root" --quit-after 2 -- --preview=mahjong
 "$task_script_dir/smoke-mahjong.sh" standard
+"$task_script_dir/smoke-mahjong.sh" sichuan

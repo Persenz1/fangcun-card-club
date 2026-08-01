@@ -103,7 +103,8 @@ public partial class Bootstrap : Control
                 : "斗地主\n\n经典三人叫地主 · 无癞子\n\n开始游戏";
 
         doudizhuButton.Pressed += ShowDoudizhu;
-        lobby.GetNode<Button>("%MahjongEntryButton").Pressed += ShowMahjong;
+        lobby.GetNode<Button>("%MahjongEntryButton").Pressed += () => ShowMahjong(MahjongMode.Standard);
+        lobby.GetNode<Button>("%SichuanEntryButton").Pressed += () => ShowMahjong(MahjongMode.Sichuan);
         supplyButton.Pressed += () =>
         {
             if (LocalProfileEconomy.ClaimFreeSupply(_profile))
@@ -134,6 +135,12 @@ public partial class Bootstrap : Control
 
     private void ShowMahjong()
     {
+        ShowMahjong(_mahjongMode);
+    }
+
+    private void ShowMahjong(MahjongMode mode)
+    {
+        _mahjongMode = mode;
         var table = (MahjongTableController)ChangeScreen(MahjongScenePath);
         table.Initialize(
             _mahjongMode,

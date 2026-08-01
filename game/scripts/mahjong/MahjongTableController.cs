@@ -378,7 +378,12 @@ public partial class MahjongTableController : Control
             return;
         }
 
-        _resultTitle.Text = _mode == MahjongMode.Riichi ? "整场结果" : "本局结算";
+        _resultTitle.Text = _mode switch
+        {
+            MahjongMode.Sichuan => "血战最终结算",
+            MahjongMode.Riichi => "整场结果",
+            _ => "本局结算",
+        };
         _resultDetails.Text = view.SettlementLines.Count == 0
             ? "本局已结束"
             : string.Join("\n", view.SettlementLines);

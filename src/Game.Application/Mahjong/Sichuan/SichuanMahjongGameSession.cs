@@ -320,7 +320,10 @@ public sealed class SichuanMahjongGameSession : IMahjongGameSession
                 discarded.RiverTile.Tile),
             SichuanMeldDeclaredEvent meld => new MahjongAnimationEvent(
                 MahjongAnimationEventKind.Meld,
-                $"{MahjongText.Seat(meld.Seat)}{MahjongText.Meld(meld.Meld.Type)}",
+                $"{MahjongText.Seat(meld.Seat)}{MahjongText.Meld(meld.Meld.Type)}"
+                + (meld.ScoreChanges[(int)meld.Seat] == 0
+                    ? string.Empty
+                    : $"，刮风下雨 {FormatScore(meld.ScoreChanges[(int)meld.Seat])}"),
                 meld.Seat,
                 meld: MahjongPresentationBuilder.FromMeld(meld.Meld)),
             SichuanReactionPassedEvent passed => new MahjongAnimationEvent(
@@ -329,7 +332,8 @@ public sealed class SichuanMahjongGameSession : IMahjongGameSession
                 passed.Seat),
             SichuanWinSettledEvent win => new MahjongAnimationEvent(
                 MahjongAnimationEventKind.Win,
-                $"{MahjongText.Seat(win.Win.Winner)}和牌退出，{win.Win.Fan}番",
+                $"{MahjongText.Seat(win.Win.Winner)}和牌退出："
+                + $"{string.Join("、", win.Win.Patterns)}（{win.Win.Fan}番）",
                 win.Win.Winner),
             SichuanMahjongFinishedEvent finished => new MahjongAnimationEvent(
                 MahjongAnimationEventKind.MatchFinished,

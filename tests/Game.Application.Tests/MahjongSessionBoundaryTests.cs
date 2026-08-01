@@ -111,4 +111,28 @@ public sealed class MahjongSessionBoundaryTests
         Assert.Empty(result.Events);
         Assert.Equal(0, changed);
     }
+
+    [Fact]
+    public void Sichuan_adapter_maps_a_complete_blood_battle_to_presentation_events()
+    {
+        var session = SichuanMahjongGameSession.Start(2026080102);
+        var eventKinds = new HashSet<MahjongAnimationEventKind>();
+        var acceptedCommands = 0;
+        while (!session.Snapshot.IsFinished && acceptedCommands < 600)
+        {
+            var result = session.Snapshot.IsHumanActionRequired
+                ? session.DispatchSuggestedAction()
+                : session.AdvanceAiTurn();
+            Assert.True(result.Accepted, result.Error);
+            eventKinds.UnionWith(result.Events.Select(@event => @event.Kind));
+            acceptedCommands++;
+        }
+
+        Assert.True(session.Snapshot.IsFinished);
+        Assert.Contains(MahjongAnimationEventKind.Exchange, eventKinds);
+        Assert.Contains(MahjongAnimationEventKind.Declaration, eventKinds);
+        Assert.Contains(MahjongAnimationEventKind.MatchFinished, eventKinds);
+        Assert.NotEmpty(session.Snapshot.SettlementLines);
+        Assert.Equal(0, session.RuleSnapshot.ScoreChanges.Sum());
+    }
 }
