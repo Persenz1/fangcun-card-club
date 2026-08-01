@@ -135,4 +135,32 @@ public sealed class MahjongSessionBoundaryTests
         Assert.NotEmpty(session.Snapshot.SettlementLines);
         Assert.Equal(0, session.RuleSnapshot.ScoreChanges.Sum());
     }
+
+    [Fact]
+    public void Riichi_adapter_advances_across_hands_to_a_ranked_match_result()
+    {
+        var session = RiichiMahjongGameSession.Start(2026080103);
+        var finishedHands = 0;
+        var matchFinished = false;
+        var acceptedCommands = 0;
+        while (!session.Snapshot.IsFinished && acceptedCommands < 5000)
+        {
+            var result = session.Snapshot.IsHumanActionRequired
+                ? session.DispatchSuggestedAction()
+                : session.AdvanceAiTurn();
+            Assert.True(result.Accepted, result.Error);
+            finishedHands += result.Events.Count(@event =>
+                @event.Kind == MahjongAnimationEventKind.HandFinished);
+            matchFinished |= result.Events.Any(@event =>
+                @event.Kind == MahjongAnimationEventKind.MatchFinished);
+            acceptedCommands++;
+        }
+
+        Assert.True(session.Snapshot.IsFinished);
+        Assert.True(finishedHands >= 4);
+        Assert.True(matchFinished);
+        Assert.Equal(100000, session.RuleSnapshot.MatchResult!.FinalScores.Sum());
+        Assert.Equal(4, session.RuleSnapshot.MatchResult.Ranking.Count);
+        Assert.Equal(4, session.Snapshot.SettlementLines.Count);
+    }
 }

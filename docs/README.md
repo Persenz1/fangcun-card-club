@@ -15,7 +15,7 @@
 | 任务档案 | 每个工程任务的目标、改动、验证和遗留项 | [tasks/README.md](tasks/README.md) |
 | 模板 | 新文档和任务记录的标准模板 | [templates/README.md](templates/README.md) |
 
-近期新增设计：[麻将混合渲染](architecture/麻将混合渲染.md)；近期冻结规则：[斗地主规则](rules/斗地主规则.md)、[大众麻将规则](rules/大众麻将规则.md)、[四川麻将规则](rules/四川麻将规则.md)、[日式立直麻将规则](rules/日式立直麻将规则.md)；近期任务：[四川血战 Godot 试玩闭环](tasks/2026-08-01-016-四川血战Godot试玩闭环.md)。
+近期新增设计：[麻将混合渲染](architecture/麻将混合渲染.md)；近期冻结规则：[斗地主规则](rules/斗地主规则.md)、[大众麻将规则](rules/大众麻将规则.md)、[四川麻将规则](rules/四川麻将规则.md)、[日式立直麻将规则](rules/日式立直麻将规则.md)；近期任务：[四人日麻 Godot 东风战闭环](tasks/2026-08-01-017-四人日麻Godot东风战闭环.md)。
 
 ## 强制维护规则
 

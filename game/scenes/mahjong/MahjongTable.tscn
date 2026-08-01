@@ -309,6 +309,35 @@ offset_right = 942.0
 offset_bottom = 520.0
 text = "出牌"
 
+[node name="LastHandPanel" type="Panel" parent="."]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+offset_left = 620.0
+offset_top = 68.0
+offset_right = 810.0
+offset_bottom = 176.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("Seat")
+
+[node name="LastHandInfo" type="Label" parent="LastHandPanel"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 6.0
+offset_right = -8.0
+offset_bottom = -6.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.9, 0.82, 0.63, 1)
+theme_override_font_sizes/font_size = 11
+text = "上一局结果"
+autowrap_mode = 2
+vertical_alignment = 1
+
 [node name="ResultOverlay" type="ColorRect" parent="."]
 unique_name_in_owner = true
 visible = false

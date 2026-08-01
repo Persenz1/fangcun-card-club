@@ -309,6 +309,13 @@ public partial class MahjongBoard3D : Node3D
             return;
         }
 
+        if (_view?.Mode == MahjongMode.Riichi
+            && !_view.IsFinished
+            && cue.Kind is MahjongAnimationEventKind.Win or MahjongAnimationEventKind.HandFinished)
+        {
+            return;
+        }
+
         if (cue.Tile is { } physicalTile && _visibleTileNodes.TryGetValue(physicalTile, out var tileNode))
         {
             tileNode.SetSelected(true);

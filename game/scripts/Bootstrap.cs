@@ -105,6 +105,7 @@ public partial class Bootstrap : Control
         doudizhuButton.Pressed += ShowDoudizhu;
         lobby.GetNode<Button>("%MahjongEntryButton").Pressed += () => ShowMahjong(MahjongMode.Standard);
         lobby.GetNode<Button>("%SichuanEntryButton").Pressed += () => ShowMahjong(MahjongMode.Sichuan);
+        lobby.GetNode<Button>("%RiichiEntryButton").Pressed += () => ShowMahjong(MahjongMode.Riichi);
         supplyButton.Pressed += () =>
         {
             if (LocalProfileEconomy.ClaimFreeSupply(_profile))

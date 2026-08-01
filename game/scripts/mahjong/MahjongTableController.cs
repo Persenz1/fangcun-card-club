@@ -27,6 +27,8 @@ public partial class MahjongTableController : Control
     private bool _initialized;
     private bool _inputLocked;
     private int _lifecycleVersion;
+    private Label _lastHandInfo = null!;
+    private Control _lastHandPanel = null!;
     private MahjongMode _mode;
     private Label _playerSeatInfo = null!;
     private Control _resultOverlay = null!;
@@ -59,6 +61,8 @@ public partial class MahjongTableController : Control
         _resultOverlay = GetNode<Control>("%ResultOverlay");
         _resultTitle = GetNode<Label>("%ResultTitle");
         _resultDetails = GetNode<Label>("%ResultDetails");
+        _lastHandPanel = GetNode<Control>("%LastHandPanel");
+        _lastHandInfo = GetNode<Label>("%LastHandInfo");
 
         _board.PlayerSelectionChanged += OnPlayerSelectionChanged;
         GetNode<Button>("%BackButton").Pressed += ReturnToLobby;
@@ -330,7 +334,20 @@ public partial class MahjongTableController : Control
             || _autoEnabled
             || view.SuggestedActionId is null;
         RebuildActionOptions(view);
+        RefreshLastHand(view);
         RefreshResult(view);
+    }
+
+    private void RefreshLastHand(MahjongSessionView view)
+    {
+        var visible = _mode == MahjongMode.Riichi
+            && !view.IsFinished
+            && view.SettlementLines.Count > 0;
+        _lastHandPanel.Visible = visible;
+        if (visible)
+        {
+            _lastHandInfo.Text = "上一局\n" + string.Join("\n", view.SettlementLines);
+        }
     }
 
     private void RebuildActionOptions(MahjongSessionView view)

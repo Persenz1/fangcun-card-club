@@ -175,12 +175,11 @@ offset_left = 54.0
 offset_top = 304.0
 offset_right = 354.0
 offset_bottom = 372.0
-theme_override_colors/font_color = Color(0.68, 0.72, 0.7, 1)
+theme_override_colors/font_color = Color(0.96, 0.92, 0.72, 1)
 theme_override_font_sizes/font_size = 21
 theme_override_styles/normal = SubResource("MahjongEntry")
 theme_override_styles/hover = SubResource("MahjongHover")
-text = "四人日麻  ·  接入中"
-disabled = true
+text = "四人日麻  ·  完整东风战"
 
 [node name="DoudizhuEntryButton" type="Button" parent="."]
 unique_name_in_owner = true
