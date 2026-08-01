@@ -153,7 +153,7 @@ theme_override_colors/font_color = Color(0.96, 0.92, 0.72, 1)
 theme_override_font_sizes/font_size = 25
 theme_override_styles/normal = SubResource("MahjongEntry")
 theme_override_styles/hover = SubResource("MahjongHover")
-text = "麻将\n\n大众 · 四川血战 · 日式立直\n\n桌面预览（玩法接入中）"
+text = "麻将\n\n大众麻将\n\n完整单局已可玩"
 
 [node name="DoudizhuEntryButton" type="Button" parent="."]
 unique_name_in_owner = true

@@ -1,5 +1,6 @@
 using FangcunCardClub.Game.Doudizhu;
 using FangcunCardClub.Game.Mahjong;
+using Game.Application.Mahjong;
 using Game.Application.Profiles;
 using Godot;
 
@@ -13,6 +14,9 @@ public partial class Bootstrap : Control
     private Control? _currentScreen;
     private bool _doudizhuAutoPlay;
     private double _doudizhuTurnDelaySeconds = 0.42;
+    private ulong? _mahjongInitialSeed;
+    private MahjongMode _mahjongMode = MahjongMode.Standard;
+    private double _mahjongTurnDelaySeconds = MahjongAnimationTiming.AiThinkMilliseconds / 1000.0;
     private LocalPlayerProfile _profile = null!;
     private JsonProfileStore? _profileStore;
     private Label _resolutionBadge = null!;
@@ -32,6 +36,22 @@ public partial class Bootstrap : Control
         if (userArguments.Contains("--fast-autoplay", StringComparer.Ordinal))
         {
             _doudizhuTurnDelaySeconds = 0.01;
+            _mahjongTurnDelaySeconds = 0.01;
+        }
+
+        _mahjongMode = userArguments.FirstOrDefault(argument =>
+                argument.StartsWith("--mahjong-mode=", StringComparison.Ordinal)) switch
+        {
+            "--mahjong-mode=sichuan" => MahjongMode.Sichuan,
+            "--mahjong-mode=riichi" => MahjongMode.Riichi,
+            _ => MahjongMode.Standard,
+        };
+        var mahjongSeedArgument = userArguments.FirstOrDefault(argument =>
+            argument.StartsWith("--mahjong-seed=", StringComparison.Ordinal));
+        if (mahjongSeedArgument is not null
+            && ulong.TryParse(mahjongSeedArgument["--mahjong-seed=".Length..], out var mahjongSeed))
+        {
+            _mahjongInitialSeed = mahjongSeed;
         }
         if (previewArgument is null)
         {
@@ -114,36 +134,13 @@ public partial class Bootstrap : Control
 
     private void ShowMahjong()
     {
-        var table = ChangeScreen(MahjongScenePath);
-        var board = table.GetNode<MahjongBoard3D>("%MahjongBoard3D");
-        var tableGuide = table.GetNode<Control>("%TableGuide");
-        var status = table.GetNode<Label>("%StatusLabel");
-
-        board.PlayerTileSelected += (tileIndex, displayName) =>
-        {
-            status.Text = tileIndex >= 0
-                ? $"已选择 {displayName}；3D 层只上抬牌，合法性以后由麻将规则层提供。"
-                : "未选择牌；点击 3D 手牌可以切换选中状态。";
-        };
-
-        table.GetNode<Button>("%BackButton").Pressed += ShowLobby;
-        table.GetNode<Button>("%HintButton").Pressed += () =>
-        {
-            board.SelectPlayerTile(7);
-            status.Text = "提示占位：推荐打八筒；正式版本同时显示向听数和进张。";
-        };
-        BindAutoButton(table.GetNode<Button>("%AutoButton"), status);
-        var guideButton = table.GetNode<Button>("%GuideButton");
-        guideButton.Pressed += () =>
-        {
-            tableGuide.Visible = !tableGuide.Visible;
-            guideButton.Text = tableGuide.Visible ? "标线：开" : "标线：关";
-        };
-        BindMahjongAction(table, "%ChowButton", "吃");
-        BindMahjongAction(table, "%PongButton", "碰");
-        BindMahjongAction(table, "%KongButton", "杠");
-        BindMahjongAction(table, "%WinButton", "和牌");
-        BindMahjongAction(table, "%SkipButton", "跳过");
+        var table = (MahjongTableController)ChangeScreen(MahjongScenePath);
+        table.Initialize(
+            _mahjongMode,
+            ShowLobby,
+            _doudizhuAutoPlay,
+            _mahjongTurnDelaySeconds,
+            _mahjongInitialSeed);
     }
 
     private Control ChangeScreen(string scenePath)
@@ -155,28 +152,6 @@ public partial class Bootstrap : Control
         scene.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
         _currentScreen = scene;
         return scene;
-    }
-
-    private static void BindAutoButton(Button button, Label status)
-    {
-        var enabled = false;
-        button.Pressed += () =>
-        {
-            enabled = !enabled;
-            button.Text = enabled ? "托管：开" : "托管：关";
-            status.Text = enabled
-                ? "托管已开启；正式版本与提示共用同一个决策接口。"
-                : "托管已关闭。";
-        };
-    }
-
-    private static void BindMahjongAction(Control table, string buttonPath, string action)
-    {
-        var status = table.GetNode<Label>("%StatusLabel");
-        table.GetNode<Button>(buttonPath).Pressed += () =>
-        {
-            status.Text = $"{action}按钮命中：等待麻将规则层提供可用状态和执行结果。";
-        };
     }
 
     private void UpdateResolutionBadge()

@@ -1,9 +1,10 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene load_steps=9 format=3]
 
 [ext_resource type="Texture2D" path="res://game/assets/backgrounds/candidates/bg_mahjong_night_v001.png" id="1_background"]
 [ext_resource type="Script" path="res://game/scripts/mahjong/MahjongBoard3D.cs" id="2_board"]
 [ext_resource type="Script" path="res://game/scripts/mahjong/Mahjong3DLayer.cs" id="3_layer"]
 [ext_resource type="Script" path="res://game/scripts/mahjong/MahjongTableGuide.cs" id="4_guide"]
+[ext_resource type="Script" path="res://game/scripts/mahjong/MahjongTableController.cs" id="5_controller"]
 
 [sub_resource type="StyleBoxFlat" id="Seat"]
 bg_color = Color(0.035, 0.065, 0.105, 0.96)
@@ -48,6 +49,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("5_controller")
 
 [node name="BackgroundPlate" type="TextureRect" parent="."]
 layout_mode = 1
@@ -119,7 +121,8 @@ offset_top = 12.0
 offset_right = 614.0
 offset_bottom = 62.0
 
-[node name="Info" type="Label" parent="RoundPanel"]
+[node name="RoundInfo" type="Label" parent="RoundPanel"]
+unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -140,7 +143,8 @@ offset_right = 605.0
 offset_bottom = 124.0
 theme_override_styles/panel = SubResource("Seat")
 
-[node name="Info" type="Label" parent="TopSeat"]
+[node name="TopSeatInfo" type="Label" parent="TopSeat"]
+unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -160,7 +164,8 @@ offset_right = 141.0
 offset_bottom = 280.0
 theme_override_styles/panel = SubResource("Seat")
 
-[node name="Info" type="Label" parent="LeftSeat"]
+[node name="LeftSeatInfo" type="Label" parent="LeftSeat"]
+unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -180,7 +185,8 @@ offset_right = 944.0
 offset_bottom = 280.0
 theme_override_styles/panel = SubResource("Seat")
 
-[node name="Info" type="Label" parent="RightSeat"]
+[node name="RightSeatInfo" type="Label" parent="RightSeat"]
+unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -201,7 +207,8 @@ offset_bottom = 275.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("Center")
 
-[node name="Info" type="Label" parent="CenterConsole"]
+[node name="CenterInfo" type="Label" parent="CenterConsole"]
+unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -226,7 +233,8 @@ offset_right = 111.0
 offset_bottom = 458.0
 theme_override_styles/panel = SubResource("PlayerSeat")
 
-[node name="Info" type="Label" parent="PlayerSeat"]
+[node name="PlayerSeatInfo" type="Label" parent="PlayerSeat"]
+unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -278,41 +286,90 @@ custom_minimum_size = Vector2(96, 42)
 layout_mode = 2
 text = "标线：开"
 
-[node name="ActionBar" type="HBoxContainer" parent="."]
+[node name="ActionScroll" type="ScrollContainer" parent="."]
 layout_mode = 0
-offset_left = 448.0
+offset_left = 350.0
+offset_top = 478.0
+offset_right = 844.0
+offset_bottom = 518.0
+horizontal_scroll_mode = 2
+vertical_scroll_mode = 0
+
+[node name="ActionOptions" type="HBoxContainer" parent="ActionScroll"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="DiscardButton" type="Button" parent="."]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 852.0
 offset_top = 478.0
 offset_right = 942.0
-offset_bottom = 518.0
-theme_override_constants/separation = 8
-alignment = 2
+offset_bottom = 520.0
+text = "出牌"
 
-[node name="ChowButton" type="Button" parent="ActionBar"]
+[node name="ResultOverlay" type="ColorRect" parent="."]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(64, 42)
-layout_mode = 2
-text = "吃"
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+color = Color(0.008, 0.016, 0.027, 0.78)
 
-[node name="PongButton" type="Button" parent="ActionBar"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(64, 42)
-layout_mode = 2
-text = "碰"
+[node name="Panel" type="Panel" parent="ResultOverlay"]
+layout_mode = 0
+offset_left = 250.0
+offset_top = 125.0
+offset_right = 710.0
+offset_bottom = 415.0
+theme_override_styles/panel = SubResource("Center")
 
-[node name="KongButton" type="Button" parent="ActionBar"]
+[node name="ResultTitle" type="Label" parent="ResultOverlay/Panel"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(64, 42)
-layout_mode = 2
-text = "杠"
+layout_mode = 0
+offset_left = 24.0
+offset_top = 20.0
+offset_right = 436.0
+offset_bottom = 62.0
+theme_override_colors/font_color = Color(0.98, 0.84, 0.58, 1)
+theme_override_font_sizes/font_size = 25
+text = "本局结算"
+horizontal_alignment = 1
 
-[node name="WinButton" type="Button" parent="ActionBar"]
+[node name="ResultDetails" type="Label" parent="ResultOverlay/Panel"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(72, 42)
-layout_mode = 2
-text = "和牌"
+layout_mode = 0
+offset_left = 30.0
+offset_top = 78.0
+offset_right = 430.0
+offset_bottom = 198.0
+theme_override_font_sizes/font_size = 17
+text = "结算详情"
+horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="SkipButton" type="Button" parent="ActionBar"]
+[node name="Buttons" type="HBoxContainer" parent="ResultOverlay/Panel"]
+layout_mode = 0
+offset_left = 96.0
+offset_top = 220.0
+offset_right = 364.0
+offset_bottom = 268.0
+theme_override_constants/separation = 16
+alignment = 1
+
+[node name="ResultLobbyButton" type="Button" parent="ResultOverlay/Panel/Buttons"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(72, 42)
+custom_minimum_size = Vector2(120, 46)
 layout_mode = 2
-text = "跳过"
+text = "返回大厅"
+
+[node name="RematchButton" type="Button" parent="ResultOverlay/Panel/Buttons"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(120, 46)
+layout_mode = 2
+text = "再来一局"

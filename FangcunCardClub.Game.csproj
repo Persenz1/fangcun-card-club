@@ -14,5 +14,6 @@
   <ItemGroup>
     <ProjectReference Include="src/Game.Application/Game.Application.csproj" />
     <ProjectReference Include="src/Game.Doudizhu/Game.Doudizhu.csproj" />
+    <ProjectReference Include="src/Game.Mahjong/Game.Mahjong.csproj" />
   </ItemGroup>
 </Project>

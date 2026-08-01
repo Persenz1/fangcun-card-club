@@ -26,8 +26,18 @@ public partial class MahjongTableGuide : Control
             DrawRect(riverZone, RiverColor, false, 1.5f, true);
         }
 
-        var hand = MahjongTableCalibration.PlayerHandLine;
-        DrawLine(hand.Start, hand.End, HandColor, 2.5f, true);
+        foreach (var hand in MahjongTableCalibration.HandLines)
+        {
+            DrawLine(hand.Start, hand.End, HandColor, 2.5f, true);
+        }
+
+        foreach (var meld in MahjongTableCalibration.MeldLines)
+        {
+            DrawLine(meld.Start, meld.End, HandColor.Darkened(0.32f), 1.5f, true);
+        }
+
+        var dora = MahjongTableCalibration.DoraIndicatorLine;
+        DrawLine(dora.Start, dora.End, ConsoleColor, 2f, true);
         DrawRect(MahjongTableCalibration.CenterConsoleZone, ConsoleColor, false, 1.5f, true);
     }
 
