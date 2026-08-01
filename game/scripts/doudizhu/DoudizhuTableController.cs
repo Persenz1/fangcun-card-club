@@ -18,7 +18,15 @@ public partial class DoudizhuTableController : Control
 {
     private const int HumanPlayerIndex = 0;
     private const int BaseScore = 10;
-    private const double DefaultAutomaticTurnDelaySeconds = 0.42;
+    private const float PlayerCardWidth = 65;
+    private const float PlayerCardHeight = 96;
+    private const float PlayedCardWidth = 50;
+    private const float PlayedCardHeight = 72;
+    private const int MaximumPlayedCardsWidth = 484;
+    private const double RecoveryToastDurationSeconds = 2.6;
+    internal const double DefaultAutomaticTurnDelaySeconds = 1.35;
+    private const double MinimumAutomaticTurnDelayFactor = 0.82;
+    private const double MaximumAutomaticTurnDelayFactor = 1.32;
 
     private static long _lastIssuedSeed = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
@@ -43,13 +51,16 @@ public partial class DoudizhuTableController : Control
     private bool _autoEnabled;
     private bool _inputLocked;
     private bool _initialized;
-    private Label _lastPlayInfo = null!;
+    private HBoxContainer _lastPlayCards = null!;
+    private Label _lastPlayPattern = null!;
+    private Label _lastPlayTitle = null!;
     private Label _leftSeatInfo = null!;
     private int _lifecycleVersion;
     private LocalPlayerProfile _profile = null!;
     private Label _playerSeatInfo = null!;
     private HBoxContainer _playerHand = null!;
     private Button _playButton = null!;
+    private Label _recoveryToast = null!;
     private Control _resultOverlay = null!;
     private Label _resultDetails = null!;
     private Button _rematchButton = null!;
@@ -70,7 +81,9 @@ public partial class DoudizhuTableController : Control
         _rightSeatInfo = GetNode<Label>("%RightSeatInfo");
         _playerSeatInfo = GetNode<Label>("%PlayerSeatInfo");
         _bottomCardsLabel = GetNode<Label>("%BottomCardsLabel");
-        _lastPlayInfo = GetNode<Label>("%LastPlayInfo");
+        _lastPlayTitle = GetNode<Label>("%LastPlayTitle");
+        _lastPlayCards = GetNode<HBoxContainer>("%LastPlayCards");
+        _lastPlayPattern = GetNode<Label>("%LastPlayPattern");
         _playerHand = GetNode<HBoxContainer>("%PlayerHand");
         _statusLabel = GetNode<Label>("%StatusLabel");
         _actionBar = GetNode<HBoxContainer>("%ActionBar");
@@ -79,6 +92,7 @@ public partial class DoudizhuTableController : Control
         _hintButton = GetNode<Button>("%HintButton");
         _passButton = GetNode<Button>("%PassButton");
         _playButton = GetNode<Button>("%PlayButton");
+        _recoveryToast = GetNode<Label>("%RecoveryToast");
         _callButton = GetNode<Button>("%CallButton");
         _bidPassButton = GetNode<Button>("%BidPassButton");
         _resultOverlay = GetNode<Control>("%ResultOverlay");
@@ -124,7 +138,8 @@ public partial class DoudizhuTableController : Control
         if (_profile.ActiveDoudizhu is { } recovery)
         {
             _session = DoudizhuGameSession.Restore(recovery);
-            _statusMessage = "已恢复上次未完成的牌局。";
+            _statusMessage = string.Empty;
+            ShowRecoveryToast();
             if (_session.RuleSnapshot.Phase == DoudizhuPhase.Finished)
             {
                 ApplySettlement();
@@ -150,6 +165,7 @@ public partial class DoudizhuTableController : Control
         _lifecycleVersion++;
         _autoEnabled = false;
         _inputLocked = false;
+        _recoveryToast.Visible = false;
         _selectedCards.Clear();
         if (LocalProfileEconomy.ClaimFreeSupply(_profile))
         {
@@ -189,6 +205,19 @@ public partial class DoudizhuTableController : Control
         if (_autoEnabled)
         {
             ContinueAutomaticTurns();
+        }
+    }
+
+    private async void ShowRecoveryToast()
+    {
+        var lifecycleVersion = _lifecycleVersion;
+        _recoveryToast.Visible = true;
+        await ToSignal(
+            GetTree().CreateTimer(RecoveryToastDurationSeconds),
+            SceneTreeTimer.SignalName.Timeout);
+        if (lifecycleVersion == _lifecycleVersion && IsInsideTree())
+        {
+            _recoveryToast.Visible = false;
         }
     }
 
@@ -341,7 +370,7 @@ public partial class DoudizhuTableController : Control
                 _inputLocked = true;
                 RefreshTable();
                 await ToSignal(
-                    GetTree().CreateTimer(_automaticTurnDelaySeconds),
+                    GetTree().CreateTimer(CreateAutomaticTurnDelay()),
                     SceneTreeTimer.SignalName.Timeout);
 
                 if (lifecycleVersion != _lifecycleVersion || !IsInsideTree())
@@ -399,7 +428,7 @@ public partial class DoudizhuTableController : Control
         _bottomCardsLabel.Text = observation.VisibleBottomCards.Count == 0
             ? "底牌：叫地主后公开"
             : $"底牌：{string.Join("  ", observation.VisibleBottomCards.Select(FormatCard))}";
-        _lastPlayInfo.Text = FormatLastPlay(observation);
+        RefreshLastPlay(observation);
 
         RebuildHand(observation);
         RefreshControls(view);
@@ -417,9 +446,10 @@ public partial class DoudizhuTableController : Control
         var playing = observation.Phase == DoudizhuPhase.Playing;
 
         _actionBar.Visible = active;
-        _bidActionBar.Visible = bidding;
+        var canBid = bidding && view.IsHumanTurn && !_inputLocked && !_autoEnabled;
+        _bidActionBar.Visible = canBid;
         _autoButton.Visible = active;
-        _autoButton.Text = _autoEnabled ? "托管：开" : "托管：关";
+        _autoButton.Text = _autoEnabled ? "托管\n开" : "托管\n关";
         _autoButton.Disabled = !active;
         _hintButton.Visible = playing;
         _passButton.Visible = playing;
@@ -427,7 +457,6 @@ public partial class DoudizhuTableController : Control
 
         _callButton.Text = observation.BidPrompt == DoudizhuBidPrompt.Rob ? "抢地主" : "叫地主";
         _bidPassButton.Text = observation.BidPrompt == DoudizhuBidPrompt.Rob ? "不抢" : "不叫";
-        var canBid = bidding && view.IsHumanTurn && !_inputLocked && !_autoEnabled;
         _callButton.Disabled = !canBid;
         _bidPassButton.Disabled = !canBid;
 
@@ -496,24 +525,134 @@ public partial class DoudizhuTableController : Control
 
     private Button CreateCardButton(Card card)
     {
+        var faceColor = IsRed(card) ? new Color("9c3030") : new Color("18202a");
         var button = new Button
         {
-            Text = FormatCardFace(card),
             TooltipText = FormatCard(card),
-            CustomMinimumSize = new Vector2(45, 88),
+            CustomMinimumSize = new Vector2(PlayerCardWidth, PlayerCardHeight),
             ToggleMode = true,
             ButtonPressed = _selectedCards.Contains(card),
             FocusMode = FocusModeEnum.All,
         };
-        button.AddThemeFontSizeOverride("font_size", 16);
-        button.AddThemeColorOverride("font_color", IsRed(card) ? new Color("9c3030") : new Color("18202a"));
-        button.AddThemeColorOverride("font_pressed_color", new Color("102521"));
         button.AddThemeStyleboxOverride("normal", CreatePieceStyle(_pieceBackground, _pieceBorder));
+        button.AddThemeStyleboxOverride("disabled", CreatePieceStyle(_pieceBackground, _pieceBorder));
         button.AddThemeStyleboxOverride("hover", CreatePieceStyle(_pieceHover, new Color("d3a84a")));
         button.AddThemeStyleboxOverride("pressed", CreatePieceStyle(_pieceSelected, new Color("b9f3dc")));
         button.AddThemeStyleboxOverride("focus", CreatePieceStyle(new Color(0, 0, 0, 0), new Color("f2bd55")));
+        button.AddChild(CreateCardFaceLabel(card, faceColor, 19, 7, centerJoker: false));
         button.Toggled += pressed => OnCardToggled(card, pressed);
         return button;
+    }
+
+    private void RefreshLastPlay(DoudizhuObservation observation)
+    {
+        foreach (var child in _lastPlayCards.GetChildren())
+        {
+            _lastPlayCards.RemoveChild(child);
+            child.QueueFree();
+        }
+
+        if (observation.LastMove is { } move && observation.LastMovePlayerIndex is { } playerIndex)
+        {
+            _lastPlayTitle.Text = $"{FormatSeatName(playerIndex)}出牌";
+            _lastPlayPattern.Text = FormatPattern(move.Pattern.Kind);
+            _lastPlayCards.Visible = true;
+            _lastPlayCards.AddThemeConstantOverride(
+                "separation",
+                CalculatePlayedCardSeparation(move.Cards.Count));
+            foreach (var card in move.Cards
+                         .OrderByDescending(card => card.Rank)
+                         .ThenBy(card => card.Suit))
+            {
+                _lastPlayCards.AddChild(CreatePlayedCard(card));
+            }
+
+            return;
+        }
+
+        _lastPlayCards.Visible = false;
+        (_lastPlayTitle.Text, _lastPlayPattern.Text) = observation.Phase switch
+        {
+            DoudizhuPhase.Bidding => ("等待叫地主", "底牌尚未公开"),
+            DoudizhuPhase.Playing => ("新一轮", $"{FormatSeatName(observation.CurrentPlayerIndex)}领出"),
+            DoudizhuPhase.Finished => ("本局结束", string.Empty),
+            _ => ("准备牌局", string.Empty),
+        };
+    }
+
+    private Panel CreatePlayedCard(Card card)
+    {
+        var panel = new Panel
+        {
+            CustomMinimumSize = new Vector2(PlayedCardWidth, PlayedCardHeight),
+            MouseFilter = MouseFilterEnum.Ignore,
+        };
+        panel.AddThemeStyleboxOverride("panel", CreatePieceStyle(_pieceBackground, _pieceBorder));
+        var faceColor = IsRed(card) ? new Color("9c3030") : new Color("18202a");
+        if (card.IsJoker)
+        {
+            panel.AddChild(CreateCardFaceLabel(card, faceColor, 16, 5, centerJoker: true));
+        }
+        else
+        {
+            panel.AddChild(CreateCenteredSuitLabel(card, faceColor));
+            panel.AddChild(CreateCardFaceLabel(card, faceColor, 15, 5, centerJoker: false));
+        }
+
+        return panel;
+    }
+
+    private static Label CreateCenteredSuitLabel(Card card, Color color)
+    {
+        var suit = new Label
+        {
+            Text = FormatSuit(card.Suit),
+            AnchorRight = 1,
+            AnchorBottom = 1,
+            HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center,
+            MouseFilter = MouseFilterEnum.Ignore,
+        };
+        suit.AddThemeFontSizeOverride("font_size", 28);
+        suit.AddThemeColorOverride("font_color", color);
+        return suit;
+    }
+
+    private static Label CreateCardFaceLabel(
+        Card card,
+        Color color,
+        int fontSize,
+        float inset,
+        bool centerJoker)
+    {
+        var centered = centerJoker && card.IsJoker;
+        var face = new Label
+        {
+            Text = FormatCardFace(card),
+            AnchorRight = 1,
+            AnchorBottom = 1,
+            OffsetLeft = inset,
+            OffsetTop = inset,
+            OffsetRight = -3,
+            OffsetBottom = -3,
+            HorizontalAlignment = centered ? HorizontalAlignment.Center : HorizontalAlignment.Left,
+            VerticalAlignment = centered ? VerticalAlignment.Center : VerticalAlignment.Top,
+            MouseFilter = MouseFilterEnum.Ignore,
+        };
+        face.AddThemeFontSizeOverride("font_size", fontSize);
+        face.AddThemeColorOverride("font_color", color);
+        return face;
+    }
+
+    private static int CalculatePlayedCardSeparation(int cardCount)
+    {
+        if (cardCount <= 1)
+        {
+            return 0;
+        }
+
+        var availableSeparation = (MaximumPlayedCardsWidth - (cardCount * PlayedCardWidth)) / (cardCount - 1);
+        return Math.Clamp((int)Math.Floor(availableSeparation), -30, 6);
     }
 
     private void OnCardToggled(Card card, bool pressed)
@@ -601,23 +740,11 @@ public partial class DoudizhuTableController : Control
         return $"{current}{name}\n\n{observation.RemainingCardCounts[playerIndex]} 张\n{role}";
     }
 
-    private static string FormatLastPlay(DoudizhuObservation observation)
+    private double CreateAutomaticTurnDelay()
     {
-        if (observation.LastMove is { } move && observation.LastMovePlayerIndex is { } playerIndex)
-        {
-            var cardSummary = move.Cards.Count <= 10
-                ? string.Join("  ", move.Cards.Select(FormatCard))
-                : $"{string.Join("  ", move.Cards.Take(8).Select(FormatCard))}  …（共 {move.Cards.Count} 张）";
-            return $"{FormatSeatName(playerIndex)}出牌\n{cardSummary}\n{FormatPattern(move.Pattern.Kind)}";
-        }
-
-        return observation.Phase switch
-        {
-            DoudizhuPhase.Bidding => "等待叫地主\n\n底牌尚未公开",
-            DoudizhuPhase.Playing => $"新一轮\n\n{FormatSeatName(observation.CurrentPlayerIndex)}领出",
-            DoudizhuPhase.Finished => "本局结束",
-            _ => "准备牌局",
-        };
+        var factor = MinimumAutomaticTurnDelayFactor
+            + (Random.Shared.NextDouble() * (MaximumAutomaticTurnDelayFactor - MinimumAutomaticTurnDelayFactor));
+        return _automaticTurnDelaySeconds * factor;
     }
 
     private static string CreateDefaultStatus(DoudizhuSessionView view)

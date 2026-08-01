@@ -13,7 +13,7 @@ public partial class Bootstrap : Control
     private const string MahjongScenePath = "res://game/scenes/mahjong/MahjongTable.tscn";
     private Control? _currentScreen;
     private bool _doudizhuAutoPlay;
-    private double _doudizhuTurnDelaySeconds = 0.42;
+    private double _doudizhuTurnDelaySeconds = DoudizhuTableController.DefaultAutomaticTurnDelaySeconds;
     private ulong? _mahjongInitialSeed;
     private MahjongMode _mahjongMode = MahjongMode.Standard;
     private double _mahjongTurnDelaySeconds = MahjongAnimationTiming.AiThinkMilliseconds / 1000.0;
@@ -90,6 +90,7 @@ public partial class Bootstrap : Control
         var beanLabel = lobby.GetNode<Label>("%BeanLabel");
         var supplyButton = lobby.GetNode<Button>("%SupplyButton");
         var doudizhuButton = lobby.GetNode<Button>("%DoudizhuEntryButton");
+        var doudizhuNewGameButton = lobby.GetNode<Button>("%DoudizhuNewGameButton");
         var standardButton = lobby.GetNode<Button>("%MahjongEntryButton");
         var sichuanButton = lobby.GetNode<Button>("%SichuanEntryButton");
         var riichiButton = lobby.GetNode<Button>("%RiichiEntryButton");
@@ -99,13 +100,20 @@ public partial class Bootstrap : Control
         supplyButton.Disabled = !needsSupply;
         supplyButton.Text = supplyButton.Disabled ? "豆子充足" : "免费补给";
         doudizhuButton.Disabled = needsSupply && _profile.ActiveDoudizhu is null;
+        doudizhuButton.OffsetBottom = _profile.ActiveDoudizhu is null ? 376 : 310;
         doudizhuButton.Text = _profile.ActiveDoudizhu is not null
-            ? "斗地主\n\n检测到未完成牌局\n\n继续游戏"
+            ? "斗地主\n\n继续未完成牌局"
             : needsSupply
                 ? "斗地主\n\n豆子不足\n\n请先免费补给"
                 : "斗地主\n\n经典三人叫地主 · 无癞子\n\n开始游戏";
+        doudizhuNewGameButton.Visible = _profile.ActiveDoudizhu is not null;
+        doudizhuNewGameButton.Disabled = needsSupply;
+        doudizhuNewGameButton.Text = needsSupply
+            ? "先补给，再放弃续局"
+            : "放弃续局并新开";
 
         doudizhuButton.Pressed += ShowDoudizhu;
+        doudizhuNewGameButton.Pressed += StartFreshDoudizhu;
         ConfigureMahjongEntry(standardButton, MahjongMode.Standard, "大众麻将", "完整单局");
         ConfigureMahjongEntry(sichuanButton, MahjongMode.Sichuan, "四川血战", "完整单局");
         ConfigureMahjongEntry(riichiButton, MahjongMode.Riichi, "四人日麻", "完整东风战");
@@ -120,6 +128,11 @@ public partial class Bootstrap : Control
                 beanLabel.Text = $"豆子 {_profile.Beans:N0}";
                 supplyButton.Disabled = true;
                 supplyButton.Text = "豆子充足";
+                if (_profile.ActiveDoudizhu is not null)
+                {
+                    doudizhuNewGameButton.Disabled = false;
+                    doudizhuNewGameButton.Text = "放弃续局并新开";
+                }
                 status.Text = "免费补给完成：无广告、无等待、无次数限制。";
             }
         };
@@ -140,6 +153,13 @@ public partial class Bootstrap : Control
             ShowLobby,
             _doudizhuAutoPlay,
             _doudizhuTurnDelaySeconds);
+    }
+
+    private void StartFreshDoudizhu()
+    {
+        _profile.ActiveDoudizhu = null;
+        SaveProfile();
+        ShowDoudizhu();
     }
 
     private void ConfigureMahjongEntry(

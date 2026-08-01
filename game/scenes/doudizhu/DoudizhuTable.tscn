@@ -170,28 +170,54 @@ vertical_alignment = 1
 
 [node name="LastPlay" type="Panel" parent="."]
 layout_mode = 0
-offset_left = 260.0
-offset_top = 188.0
-offset_right = 700.0
-offset_bottom = 282.0
+offset_left = 220.0
+offset_top = 142.0
+offset_right = 740.0
+offset_bottom = 278.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("CenterPlay")
 
-[node name="LastPlayInfo" type="Label" parent="LastPlay"]
-unique_name_in_owner = true
+[node name="LastPlayContent" type="VBoxContainer" parent="LastPlay"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 8.0
-offset_top = 8.0
+offset_top = 6.0
 offset_right = -8.0
-offset_bottom = -8.0
+offset_bottom = -6.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_constants/separation = 2
+alignment = 1
+
+[node name="LastPlayTitle" type="Label" parent="LastPlay/LastPlayContent"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 22)
+layout_mode = 2
 theme_override_colors/font_color = Color(0.94, 0.79, 0.56, 1)
 theme_override_font_sizes/font_size = 16
-text = "本轮出牌\n10♠   10♥   10♣\n三张"
+text = "本轮出牌"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="LastPlayCardCenter" type="CenterContainer" parent="LastPlay/LastPlayContent"]
+custom_minimum_size = Vector2(0, 74)
+layout_mode = 2
+
+[node name="LastPlayCards" type="HBoxContainer" parent="LastPlay/LastPlayContent/LastPlayCardCenter"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 4
+alignment = 1
+
+[node name="LastPlayPattern" type="Label" parent="LastPlay/LastPlayContent"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 22)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.94, 0.79, 0.56, 1)
+theme_override_font_sizes/font_size = 15
+text = "三张"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -223,20 +249,20 @@ vertical_alignment = 1
 [node name="PlayerHand" type="HBoxContainer" parent="."]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 106.0
-offset_top = 333.0
-offset_right = 924.0
-offset_bottom = 427.0
-theme_override_constants/separation = -7
+offset_left = 80.0
+offset_top = 340.0
+offset_right = 880.0
+offset_bottom = 441.0
+theme_override_constants/separation = -29
 alignment = 1
 
 [node name="StatusLabel" type="Label" parent="."]
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = 132.0
-offset_top = 428.0
+offset_top = 443.0
 offset_right = 828.0
-offset_bottom = 456.0
+offset_bottom = 463.0
 theme_override_colors/font_color = Color(0.5, 0.86, 0.79, 1)
 theme_override_colors/font_outline_color = Color(0.015, 0.025, 0.035, 0.95)
 theme_override_constants/outline_size = 4
@@ -244,21 +270,42 @@ text = "灰盒演示：点击手牌验证选中状态；这里不判断合法牌
 horizontal_alignment = 1
 vertical_alignment = 1
 
+[node name="RecoveryToast" type="Label" parent="."]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+offset_left = 744.0
+offset_top = 488.0
+offset_right = 938.0
+offset_bottom = 514.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.5, 0.86, 0.79, 1)
+theme_override_colors/font_outline_color = Color(0.015, 0.025, 0.035, 0.95)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 13
+text = "已恢复未完成牌局"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="AutoButton" type="Button" parent="."]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 20.0
+offset_top = 468.0
+offset_right = 84.0
+offset_bottom = 522.0
+theme_override_font_sizes/font_size = 13
+text = "托管\n关"
+
 [node name="ActionBar" type="HBoxContainer" parent="."]
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = 216.0
-offset_top = 462.0
+offset_top = 466.0
 offset_right = 744.0
-offset_bottom = 516.0
+offset_bottom = 518.0
 theme_override_constants/separation = 12
 alignment = 1
-
-[node name="AutoButton" type="Button" parent="ActionBar"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(98, 50)
-layout_mode = 2
-text = "托管：关"
 
 [node name="HintButton" type="Button" parent="ActionBar"]
 unique_name_in_owner = true
@@ -281,23 +328,25 @@ text = "出牌"
 [node name="BidActionBar" type="HBoxContainer" parent="."]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 360.0
-offset_top = 284.0
-offset_right = 600.0
-offset_bottom = 332.0
-theme_override_constants/separation = 14
+offset_left = 386.0
+offset_top = 292.0
+offset_right = 574.0
+offset_bottom = 330.0
+theme_override_constants/separation = 10
 alignment = 1
 
 [node name="BidPassButton" type="Button" parent="BidActionBar"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(104, 48)
+custom_minimum_size = Vector2(84, 38)
 layout_mode = 2
+theme_override_font_sizes/font_size = 14
 text = "不叫"
 
 [node name="CallButton" type="Button" parent="BidActionBar"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(104, 48)
+custom_minimum_size = Vector2(84, 38)
 layout_mode = 2
+theme_override_font_sizes/font_size = 14
 text = "叫地主"
 
 [node name="ResultOverlay" type="Panel" parent="."]
