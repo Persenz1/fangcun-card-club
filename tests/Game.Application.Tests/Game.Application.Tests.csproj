@@ -20,6 +20,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Game.Application\Game.Application.csproj" />
+    <ProjectReference Include="..\..\src\Game.Mahjong\Game.Mahjong.csproj" />
+    <ProjectReference Include="..\..\src\Game.Mahjong.Sichuan\Game.Mahjong.Sichuan.csproj" />
   </ItemGroup>
 
 </Project>

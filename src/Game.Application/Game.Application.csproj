@@ -3,6 +3,10 @@
   <ItemGroup>
     <ProjectReference Include="..\Game.Core\Game.Core.csproj" />
     <ProjectReference Include="..\Game.Doudizhu\Game.Doudizhu.csproj" />
+    <ProjectReference Include="..\Game.Mahjong\Game.Mahjong.csproj" />
+    <ProjectReference Include="..\Game.Mahjong.Standard\Game.Mahjong.Standard.csproj" />
+    <ProjectReference Include="..\Game.Mahjong.Sichuan\Game.Mahjong.Sichuan.csproj" />
+    <ProjectReference Include="..\Game.Mahjong.Riichi\Game.Mahjong.Riichi.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

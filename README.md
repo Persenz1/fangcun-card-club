@@ -16,6 +16,7 @@
 - 可完整运行的大众麻将吃碰杠胡、番型结算与基础 AI
 - 可完整运行的四川麻将换三张、定缺、血战、刮风下雨、流局检查与基础 AI
 - 可完整运行的四人日式立直麻将东风战、振听、宝牌、符番结算与基础 AI
+- 三种麻将共用的应用/表现契约、合法操作选项与独立会话适配器
 - xUnit 自动测试
 - 960×540 逻辑画布下的大厅、可玩斗地主牌桌和麻将交互灰盒
 - 16:9 核心安全区与 20:9 手机宽屏延展策略
@@ -112,6 +113,7 @@ fangcun-card-club/
 │   ├── Game.Core/                  # 通用命令、事件和确定性随机数
 │   ├── Game.Application/
 │   │   ├── Doudizhu/              # 斗地主玩家会话、AI 调度与命令重放恢复
+│   │   ├── Mahjong/               # 麻将公共表现数据与三种独立会话适配器
 │   │   ├── Profiles/               # 本地豆子、战绩与版本化 JSON 档案
 │   │   └── Sessions/               # 通用对局会话边界
 │   ├── Game.Doudizhu/
@@ -133,7 +135,7 @@ fangcun-card-club/
 │   ├── Game.Mahjong.Sichuan/       # 四川血战状态机、番型、结算与 AI
 │   └── Game.Mahjong.Riichi/        # 日麻东风战、振听、符番、宝牌与 AI
 ├── tests/
-│   ├── Game.Application.Tests/     # 档案、经济与斗地主恢复测试
+│   ├── Game.Application.Tests/     # 档案、经济、恢复与麻将会话边界测试
 │   ├── Game.Core.Tests/
 │   ├── Game.Doudizhu.Tests/        # 牌堆、牌型、比较与合法出牌测试
 │   ├── Game.Mahjong.Tests/         # 麻将公共牌、桌面与和牌形测试
