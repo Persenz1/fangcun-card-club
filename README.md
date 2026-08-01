@@ -48,7 +48,7 @@
 ./scripts/export-windows.sh
 ```
 
-导出结果位于被 Git 忽略的 `artifacts/windows/`。
+脚本会验证 EXE、PCK、全部玩法程序集与 .NET 运行时，并比对 ZIP 解压内容。可分发包位于被 Git 忽略的 `artifacts/windows/FangcunCardClub-win64-playtest.zip`，同目录下也保留已验收的解压目录。
 
 单独使用本地 .NET：
 
@@ -108,7 +108,7 @@ fangcun-card-club/
 │   ├── check-docs.sh               # 文档治理检查
 │   ├── check-gitignore.sh           # 忽略与必跟踪文件检查
 │   ├── dotnet.sh                   # 项目本地 .NET 入口
-│   ├── export-windows.sh           # Windows x64 导出
+│   ├── export-windows.sh           # Windows x64 导出、运行时验收与 ZIP 打包
 │   ├── godot.sh                    # 项目本地 Godot 入口
 │   ├── setup-git-hooks.sh          # 启用版本化提交钩子
 │   ├── smoke-mahjong.sh            # 三种麻将真实 Godot 全局托管烟测
