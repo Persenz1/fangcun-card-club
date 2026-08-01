@@ -29,6 +29,8 @@ public interface IMahjongGameSession
     MahjongSessionResult DispatchSuggestedAction();
 
     MahjongSessionResult AdvanceAiTurn();
+
+    MahjongRecoveryState CreateRecoveryState();
 }
 
 public sealed record MahjongSessionResult(
@@ -60,6 +62,20 @@ public static class MahjongSessionFactory
             MahjongMode.Sichuan => SichuanMahjongGameSession.Start(seed, humanSeat),
             MahjongMode.Riichi => RiichiMahjongGameSession.Start(seed, humanSeat),
             _ => throw new ArgumentOutOfRangeException(nameof(mode)),
+        };
+    }
+
+    public static IMahjongGameSession Restore(MahjongRecoveryState recovery)
+    {
+        ArgumentNullException.ThrowIfNull(recovery);
+        recovery.Validate();
+
+        return recovery.Mode switch
+        {
+            MahjongMode.Standard => StandardMahjongGameSession.Restore(recovery),
+            MahjongMode.Sichuan => SichuanMahjongGameSession.Restore(recovery),
+            MahjongMode.Riichi => RiichiMahjongGameSession.Restore(recovery),
+            _ => throw new ArgumentOutOfRangeException(nameof(recovery)),
         };
     }
 }

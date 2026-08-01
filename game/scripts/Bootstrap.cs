@@ -90,6 +90,9 @@ public partial class Bootstrap : Control
         var beanLabel = lobby.GetNode<Label>("%BeanLabel");
         var supplyButton = lobby.GetNode<Button>("%SupplyButton");
         var doudizhuButton = lobby.GetNode<Button>("%DoudizhuEntryButton");
+        var standardButton = lobby.GetNode<Button>("%MahjongEntryButton");
+        var sichuanButton = lobby.GetNode<Button>("%SichuanEntryButton");
+        var riichiButton = lobby.GetNode<Button>("%RiichiEntryButton");
 
         var needsSupply = LocalProfileEconomy.CanClaimFreeSupply(_profile);
         beanLabel.Text = $"豆子 {_profile.Beans:N0}";
@@ -103,9 +106,12 @@ public partial class Bootstrap : Control
                 : "斗地主\n\n经典三人叫地主 · 无癞子\n\n开始游戏";
 
         doudizhuButton.Pressed += ShowDoudizhu;
-        lobby.GetNode<Button>("%MahjongEntryButton").Pressed += () => ShowMahjong(MahjongMode.Standard);
-        lobby.GetNode<Button>("%SichuanEntryButton").Pressed += () => ShowMahjong(MahjongMode.Sichuan);
-        lobby.GetNode<Button>("%RiichiEntryButton").Pressed += () => ShowMahjong(MahjongMode.Riichi);
+        ConfigureMahjongEntry(standardButton, MahjongMode.Standard, "大众麻将", "完整单局");
+        ConfigureMahjongEntry(sichuanButton, MahjongMode.Sichuan, "四川血战", "完整单局");
+        ConfigureMahjongEntry(riichiButton, MahjongMode.Riichi, "四人日麻", "完整东风战");
+        standardButton.Pressed += () => ShowMahjong(MahjongMode.Standard);
+        sichuanButton.Pressed += () => ShowMahjong(MahjongMode.Sichuan);
+        riichiButton.Pressed += () => ShowMahjong(MahjongMode.Riichi);
         supplyButton.Pressed += () =>
         {
             if (LocalProfileEconomy.ClaimFreeSupply(_profile))
@@ -118,9 +124,11 @@ public partial class Bootstrap : Control
             }
         };
 
-        status.Text = _profile.ActiveDoudizhu is null
-            ? $"斗地主战绩：{_profile.DoudizhuStatistics.GamesWon} 胜 / {_profile.DoudizhuStatistics.GamesPlayed} 局。"
-            : "上次斗地主牌局已保存，进入后从原进度继续。";
+        status.Text = _profile.ActiveMahjong is { } mahjongRecovery
+            ? $"已保存{MahjongModeText(mahjongRecovery.Mode)}对局，请从对应入口继续。"
+            : _profile.ActiveDoudizhu is null
+                ? $"斗地主战绩：{_profile.DoudizhuStatistics.GamesWon} 胜 / {_profile.DoudizhuStatistics.GamesPlayed} 局。"
+                : "上次斗地主牌局已保存，进入后从原进度继续。";
     }
 
     private void ShowDoudizhu()
@@ -134,6 +142,26 @@ public partial class Bootstrap : Control
             _doudizhuTurnDelaySeconds);
     }
 
+    private void ConfigureMahjongEntry(
+        Button button,
+        MahjongMode mode,
+        string title,
+        string scope)
+    {
+        var active = _profile.ActiveMahjong;
+        button.Disabled = active is not null && active.Mode != mode;
+        if (active?.Mode == mode)
+        {
+            button.Text = $"{title}  ·  继续未完成对局";
+            return;
+        }
+
+        var statistics = _profile.MahjongStatistics.For(mode);
+        button.Text = active is null
+            ? $"{title}  ·  {scope}\n{statistics.GamesWon}/{statistics.GamesPlayed} 胜  累计 {FormatSigned(statistics.TotalScoreChange)}"
+            : $"{title}  ·  暂停新局";
+    }
+
     private void ShowMahjong()
     {
         ShowMahjong(_mahjongMode);
@@ -144,6 +172,8 @@ public partial class Bootstrap : Control
         _mahjongMode = mode;
         var table = (MahjongTableController)ChangeScreen(MahjongScenePath);
         table.Initialize(
+            _profile,
+            SaveProfile,
             _mahjongMode,
             ShowLobby,
             _doudizhuAutoPlay,
@@ -171,5 +201,21 @@ public partial class Bootstrap : Control
     private void SaveProfile()
     {
         _profileStore?.Save(_profile);
+    }
+
+    private static string MahjongModeText(MahjongMode mode)
+    {
+        return mode switch
+        {
+            MahjongMode.Standard => "大众麻将",
+            MahjongMode.Sichuan => "四川血战",
+            MahjongMode.Riichi => "四人日麻",
+            _ => mode.ToString(),
+        };
+    }
+
+    private static string FormatSigned(long value)
+    {
+        return value >= 0 ? $"+{value}" : value.ToString();
     }
 }

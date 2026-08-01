@@ -110,6 +110,56 @@ public sealed class MahjongSessionBoundaryTests
         Assert.False(result.Accepted);
         Assert.Empty(result.Events);
         Assert.Equal(0, changed);
+        Assert.Empty(session.CreateRecoveryState().AcceptedCommands);
+    }
+
+    [Theory]
+    [InlineData(MahjongMode.Standard, 2026080118UL)]
+    [InlineData(MahjongMode.Sichuan, 2026080119UL)]
+    [InlineData(MahjongMode.Riichi, 2026080120UL)]
+    public void Unfinished_session_restores_by_seed_and_accepted_command_replay(
+        MahjongMode mode,
+        ulong seed)
+    {
+        var original = MahjongSessionFactory.Start(mode, seed);
+        Advance(original, 25);
+        Assert.False(original.Snapshot.IsFinished);
+
+        var recovery = original.CreateRecoveryState();
+        var restored = MahjongSessionFactory.Restore(recovery);
+
+        AssertEquivalent(original, restored);
+        var commands = recovery.AcceptedCommands.Count;
+        while (!original.Snapshot.IsFinished && commands < 5000)
+        {
+            var originalResult = Advance(original);
+            var restoredResult = Advance(restored);
+            Assert.True(originalResult.Accepted, originalResult.Error);
+            Assert.True(restoredResult.Accepted, restoredResult.Error);
+            Assert.Equal(
+                originalResult.Events.Select(@event => @event.Message),
+                restoredResult.Events.Select(@event => @event.Message));
+            commands++;
+        }
+
+        Assert.True(original.Snapshot.IsFinished);
+        AssertEquivalent(original, restored);
+        Assert.Equal(
+            original.CreateRecoveryState().AcceptedCommands.Count,
+            restored.CreateRecoveryState().AcceptedCommands.Count);
+    }
+
+    [Fact]
+    public void Replay_rejects_a_command_that_was_not_legal_in_the_recorded_state()
+    {
+        var recovery = MahjongSessionFactory.Start(MahjongMode.Standard, 71).CreateRecoveryState();
+        recovery.AcceptedCommands.Add(new MahjongCommandRecord
+        {
+            Kind = MahjongStoredCommandKind.Pass,
+            PlayerIndex = 0,
+        });
+
+        Assert.Throws<InvalidDataException>(() => MahjongSessionFactory.Restore(recovery));
     }
 
     [Fact]
@@ -162,5 +212,51 @@ public sealed class MahjongSessionBoundaryTests
         Assert.Equal(100000, session.RuleSnapshot.MatchResult!.FinalScores.Sum());
         Assert.Equal(4, session.RuleSnapshot.MatchResult.Ranking.Count);
         Assert.Equal(4, session.Snapshot.SettlementLines.Count);
+    }
+
+    private static void Advance(IMahjongGameSession session, int count)
+    {
+        for (var index = 0; index < count && !session.Snapshot.IsFinished; index++)
+        {
+            var result = Advance(session);
+            Assert.True(result.Accepted, result.Error);
+        }
+    }
+
+    private static MahjongSessionResult Advance(IMahjongGameSession session)
+    {
+        return session.Snapshot.IsHumanActionRequired
+            ? session.DispatchSuggestedAction()
+            : session.AdvanceAiTurn();
+    }
+
+    private static void AssertEquivalent(
+        IMahjongGameSession expectedSession,
+        IMahjongGameSession actualSession)
+    {
+        var expected = expectedSession.Snapshot;
+        var actual = actualSession.Snapshot;
+        Assert.Equal(expectedSession.Seed, actualSession.Seed);
+        Assert.Equal(expected.Mode, actual.Mode);
+        Assert.Equal(expected.HumanSeat, actual.HumanSeat);
+        Assert.Equal(expected.Phase, actual.Phase);
+        Assert.Equal(expected.IsFinished, actual.IsFinished);
+        Assert.Equal(expected.Table.Dealer, actual.Table.Dealer);
+        Assert.Equal(expected.Table.CurrentSeat, actual.Table.CurrentSeat);
+        Assert.Equal(expected.Table.OfferedReactionSeat, actual.Table.OfferedReactionSeat);
+        Assert.Equal(expected.Table.LiveTilesRemaining, actual.Table.LiveTilesRemaining);
+        Assert.Equal(expected.LegalActions.Select(action => action.Label), actual.LegalActions.Select(action => action.Label));
+        Assert.Equal(expected.SettlementLines, actual.SettlementLines);
+        Assert.Equal(expected.LocalOutcome, actual.LocalOutcome);
+        for (var seat = 0; seat < 4; seat++)
+        {
+            Assert.Equal(
+                expected.Table.Seats[seat].Hand.Select(tile => tile.Tile),
+                actual.Table.Seats[seat].Hand.Select(tile => tile.Tile));
+            Assert.Equal(
+                expected.Table.Seats[seat].River.Select(tile => tile.Tile),
+                actual.Table.Seats[seat].River.Select(tile => tile.Tile));
+            Assert.Equal(expected.Table.Seats[seat].Score, actual.Table.Seats[seat].Score);
+        }
     }
 }

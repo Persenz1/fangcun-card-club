@@ -1,3 +1,4 @@
+using Game.Application.Mahjong;
 using Game.Application.Profiles;
 using Game.Doudizhu.Settlement;
 
@@ -33,5 +34,41 @@ public sealed class LocalProfileEconomyTests
         Assert.Equal(0, profile.DoudizhuStatistics.GamesWon);
         Assert.Null(profile.ActiveDoudizhu);
         Assert.True(LocalProfileEconomy.ClaimFreeSupply(profile));
+    }
+
+    [Theory]
+    [InlineData(MahjongMode.Standard, 120L, true, 120L)]
+    [InlineData(MahjongMode.Sichuan, -40L, false, -40L)]
+    [InlineData(MahjongMode.Riichi, 2400L, true, 24L)]
+    public void Mahjong_result_updates_only_its_mode_and_applies_local_bean_feedback(
+        MahjongMode mode,
+        long scoreChange,
+        bool won,
+        long expectedBeanChange)
+    {
+        var profile = new LocalPlayerProfile
+        {
+            Beans = 1_000,
+            ActiveMahjong = MahjongSessionFactory.Start(mode, 9).CreateRecoveryState(),
+        };
+
+        var actualBeanChange = LocalProfileEconomy.ApplyMahjongOutcome(
+            profile,
+            mode,
+            new MahjongLocalOutcome(scoreChange, won));
+
+        var statistics = profile.MahjongStatistics.For(mode);
+        Assert.Equal(expectedBeanChange, actualBeanChange);
+        Assert.Equal(1_000 + expectedBeanChange, profile.Beans);
+        Assert.Equal(1, statistics.GamesPlayed);
+        Assert.Equal(won ? 1 : 0, statistics.GamesWon);
+        Assert.Equal(scoreChange, statistics.TotalScoreChange);
+        Assert.Null(profile.ActiveMahjong);
+        Assert.Equal(1, new[]
+        {
+            profile.MahjongStatistics.Standard,
+            profile.MahjongStatistics.Sichuan,
+            profile.MahjongStatistics.Riichi,
+        }.Count(item => item.GamesPlayed == 1));
     }
 }

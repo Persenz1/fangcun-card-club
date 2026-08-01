@@ -14,6 +14,7 @@ namespace Game.Application.Mahjong.Riichi;
 public sealed class RiichiMahjongGameSession : IMahjongGameSession
 {
     private readonly BasicRiichiMahjongAi _ai = new();
+    private readonly List<MahjongCommandRecord> _acceptedCommands = [];
     private readonly RiichiMahjongRuleEngine _engine;
 
     private RiichiMahjongGameSession(ulong seed, MahjongSeat humanSeat)
@@ -47,6 +48,20 @@ public sealed class RiichiMahjongGameSession : IMahjongGameSession
         return new RiichiMahjongGameSession(seed, humanSeat);
     }
 
+    public static RiichiMahjongGameSession Restore(MahjongRecoveryState recovery)
+    {
+        ArgumentNullException.ThrowIfNull(recovery);
+        recovery.Validate();
+        if (recovery.Mode != MahjongMode.Riichi)
+        {
+            throw new InvalidDataException("恢复记录不是四人日麻。");
+        }
+
+        var session = new RiichiMahjongGameSession(recovery.Seed, recovery.HumanSeat);
+        session.Replay(recovery.AcceptedCommands);
+        return session;
+    }
+
     public MahjongSessionResult Dispatch(int actionId)
     {
         var mapping = CreateMappings(HumanSeat).FirstOrDefault(item => item.Option.Id == actionId);
@@ -76,12 +91,26 @@ public sealed class RiichiMahjongGameSession : IMahjongGameSession
         return DispatchAndPublish(command);
     }
 
+    public MahjongRecoveryState CreateRecoveryState()
+    {
+        return new MahjongRecoveryState
+        {
+            Mode = Mode,
+            Seed = Seed,
+            HumanSeat = HumanSeat,
+            AcceptedCommands = _acceptedCommands
+                .Select(record => MahjongCommandRecord.FromCommand(record.ToCommand()))
+                .ToList(),
+        };
+    }
+
     private MahjongSessionResult DispatchAndPublish(IGameCommand command)
     {
         var result = _engine.Dispatch(command);
         var events = result.Events.Select(MapEvent).ToArray();
         if (result.Accepted)
         {
+            _acceptedCommands.Add(MahjongCommandRecord.FromCommand(command));
             StateChanged?.Invoke();
         }
 
@@ -90,6 +119,21 @@ public sealed class RiichiMahjongGameSession : IMahjongGameSession
             CreateView(),
             events,
             result.Error);
+    }
+
+    private void Replay(IEnumerable<MahjongCommandRecord> records)
+    {
+        foreach (var record in records)
+        {
+            var command = record.ToCommand();
+            var result = _engine.Dispatch(command);
+            if (!result.Accepted)
+            {
+                throw new InvalidDataException($"四人日麻恢复命令无法重放：{result.Error}");
+            }
+
+            _acceptedCommands.Add(MahjongCommandRecord.FromCommand(command));
+        }
     }
 
     private MahjongSessionResult Reject(string error)
@@ -176,7 +220,12 @@ public sealed class RiichiMahjongGameSession : IMahjongGameSession
             FindSuggestedActionId(snapshot, mappings),
             FindAiSeat() is not null,
             snapshot.Phase == RiichiMahjongPhase.Finished,
-            CreateSettlementLines(snapshot));
+            CreateSettlementLines(snapshot),
+            snapshot.MatchResult is { } match
+                ? new MahjongLocalOutcome(
+                    match.FinalScores[(int)HumanSeat] - 25_000,
+                    match.Ranking[0] == HumanSeat)
+                : null);
     }
 
     private IReadOnlyList<MappedAction> CreateMappings(MahjongSeat seat)

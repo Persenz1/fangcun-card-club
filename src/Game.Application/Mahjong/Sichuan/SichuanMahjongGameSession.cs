@@ -15,6 +15,8 @@ namespace Game.Application.Mahjong.Sichuan;
 public sealed class SichuanMahjongGameSession : IMahjongGameSession
 {
     private readonly BasicSichuanMahjongAi _ai = new();
+    private readonly List<MahjongCommandRecord> _acceptedCommands = [];
+    private readonly int _baseScore;
     private readonly SichuanMahjongRuleEngine _engine;
 
     private SichuanMahjongGameSession(ulong seed, MahjongSeat humanSeat, int baseScore)
@@ -27,6 +29,7 @@ public sealed class SichuanMahjongGameSession : IMahjongGameSession
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(baseScore);
         Seed = seed;
         HumanSeat = humanSeat;
+        _baseScore = baseScore;
         _engine = new SichuanMahjongRuleEngine(new SplitMix64Random(seed), baseScore: baseScore);
     }
 
@@ -48,6 +51,23 @@ public sealed class SichuanMahjongGameSession : IMahjongGameSession
         int baseScore = 10)
     {
         return new SichuanMahjongGameSession(seed, humanSeat, baseScore);
+    }
+
+    public static SichuanMahjongGameSession Restore(MahjongRecoveryState recovery)
+    {
+        ArgumentNullException.ThrowIfNull(recovery);
+        recovery.Validate();
+        if (recovery.Mode != MahjongMode.Sichuan)
+        {
+            throw new InvalidDataException("恢复记录不是四川麻将。");
+        }
+
+        var session = new SichuanMahjongGameSession(
+            recovery.Seed,
+            recovery.HumanSeat,
+            recovery.BaseScore);
+        session.Replay(recovery.AcceptedCommands);
+        return session;
     }
 
     public MahjongSessionResult Dispatch(int actionId)
@@ -79,12 +99,27 @@ public sealed class SichuanMahjongGameSession : IMahjongGameSession
         return DispatchAndPublish(command);
     }
 
+    public MahjongRecoveryState CreateRecoveryState()
+    {
+        return new MahjongRecoveryState
+        {
+            Mode = Mode,
+            Seed = Seed,
+            BaseScore = _baseScore,
+            HumanSeat = HumanSeat,
+            AcceptedCommands = _acceptedCommands
+                .Select(record => MahjongCommandRecord.FromCommand(record.ToCommand()))
+                .ToList(),
+        };
+    }
+
     private MahjongSessionResult DispatchAndPublish(IGameCommand command)
     {
         var result = _engine.Dispatch(command);
         var events = result.Events.Select(MapEvent).ToArray();
         if (result.Accepted)
         {
+            _acceptedCommands.Add(MahjongCommandRecord.FromCommand(command));
             StateChanged?.Invoke();
         }
 
@@ -93,6 +128,21 @@ public sealed class SichuanMahjongGameSession : IMahjongGameSession
             CreateView(),
             events,
             result.Error);
+    }
+
+    private void Replay(IEnumerable<MahjongCommandRecord> records)
+    {
+        foreach (var record in records)
+        {
+            var command = record.ToCommand();
+            var result = _engine.Dispatch(command);
+            if (!result.Accepted)
+            {
+                throw new InvalidDataException($"四川麻将恢复命令无法重放：{result.Error}");
+            }
+
+            _acceptedCommands.Add(MahjongCommandRecord.FromCommand(command));
+        }
     }
 
     private MahjongSessionResult Reject(string error)
@@ -168,7 +218,12 @@ public sealed class SichuanMahjongGameSession : IMahjongGameSession
             FindSuggestedActionId(snapshot, mappings),
             FindAiSeat() is not null,
             snapshot.Phase == SichuanMahjongPhase.Finished,
-            CreateSettlementLines(snapshot));
+            CreateSettlementLines(snapshot),
+            snapshot.Settlement is { } settlement
+                ? new MahjongLocalOutcome(
+                    settlement.ScoreChanges[(int)HumanSeat],
+                    settlement.Wins.Any(win => win.Winner == HumanSeat))
+                : null);
     }
 
     private IReadOnlyList<MappedAction> CreateMappings(MahjongSeat seat)

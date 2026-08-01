@@ -1,3 +1,4 @@
+using Game.Application.Mahjong;
 using Game.Doudizhu.Settlement;
 
 namespace Game.Application.Profiles;
@@ -49,5 +50,34 @@ public static class LocalProfileEconomy
         }
 
         profile.ActiveDoudizhu = null;
+    }
+
+    public static long ApplyMahjongOutcome(
+        LocalPlayerProfile profile,
+        MahjongMode mode,
+        MahjongLocalOutcome outcome)
+    {
+        ArgumentNullException.ThrowIfNull(profile);
+        ArgumentNullException.ThrowIfNull(outcome);
+        if (!Enum.IsDefined(mode))
+        {
+            throw new ArgumentOutOfRangeException(nameof(mode));
+        }
+
+        var statistics = profile.MahjongStatistics.For(mode);
+        statistics.GamesPlayed++;
+        statistics.TotalScoreChange += outcome.ScoreChange;
+        if (outcome.Won)
+        {
+            statistics.GamesWon++;
+        }
+
+        var beanChange = mode == MahjongMode.Riichi
+            ? outcome.ScoreChange / 100
+            : outcome.ScoreChange;
+        var previousBeans = profile.Beans;
+        profile.Beans = Math.Max(0, profile.Beans + beanChange);
+        profile.ActiveMahjong = null;
+        return profile.Beans - previousBeans;
     }
 }

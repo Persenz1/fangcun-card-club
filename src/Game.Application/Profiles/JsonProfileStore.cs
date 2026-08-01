@@ -84,8 +84,18 @@ public sealed class JsonProfileStore
         var json = File.ReadAllText(path);
         var profile = JsonSerializer.Deserialize<LocalPlayerProfile>(json, _options)
             ?? throw new InvalidDataException("本地档案为空。");
+        Migrate(profile);
         Validate(profile);
         return profile;
+    }
+
+    private static void Migrate(LocalPlayerProfile profile)
+    {
+        if (profile.SchemaVersion == 1)
+        {
+            profile.SchemaVersion = LocalPlayerProfile.CurrentSchemaVersion;
+            profile.MahjongStatistics ??= new MahjongStatistics();
+        }
     }
 
     private static void Validate(LocalPlayerProfile profile)
@@ -96,6 +106,10 @@ public sealed class JsonProfileStore
         }
 
         if (profile.DoudizhuStatistics is null
+            || profile.MahjongStatistics is null
+            || profile.MahjongStatistics.Standard is null
+            || profile.MahjongStatistics.Sichuan is null
+            || profile.MahjongStatistics.Riichi is null
             || profile.Beans < 0
             || profile.DoudizhuStatistics.GamesPlayed < 0
             || profile.DoudizhuStatistics.GamesWon < 0
@@ -104,9 +118,29 @@ public sealed class JsonProfileStore
             throw new InvalidDataException("本地档案包含无效的豆子或战绩数据。");
         }
 
+        foreach (var statistics in new[]
+                 {
+                     profile.MahjongStatistics.Standard,
+                     profile.MahjongStatistics.Sichuan,
+                     profile.MahjongStatistics.Riichi,
+                 })
+        {
+            if (statistics.GamesPlayed < 0
+                || statistics.GamesWon < 0
+                || statistics.GamesWon > statistics.GamesPlayed)
+            {
+                throw new InvalidDataException("本地档案包含无效的麻将战绩数据。");
+            }
+        }
+
         if (profile.ActiveDoudizhu is { } recovery)
         {
             recovery.Validate();
+        }
+
+        if (profile.ActiveMahjong is { } mahjongRecovery)
+        {
+            mahjongRecovery.Validate();
         }
     }
 }

@@ -146,6 +146,8 @@ public sealed class MahjongTableView
 
 public sealed record MahjongHudItem(string Label, string Value);
 
+public sealed record MahjongLocalOutcome(long ScoreChange, bool Won);
+
 public sealed class MahjongSessionView
 {
     public MahjongSessionView(
@@ -160,7 +162,8 @@ public sealed class MahjongSessionView
         int? suggestedActionId,
         bool canAdvanceAi,
         bool isFinished,
-        IEnumerable<string>? settlementLines = null)
+        IEnumerable<string>? settlementLines = null,
+        MahjongLocalOutcome? localOutcome = null)
     {
         Mode = mode;
         HumanSeat = humanSeat;
@@ -174,6 +177,7 @@ public sealed class MahjongSessionView
         CanAdvanceAi = canAdvanceAi;
         IsFinished = isFinished;
         SettlementLines = Array.AsReadOnly((settlementLines ?? []).ToArray());
+        LocalOutcome = localOutcome;
     }
 
     public MahjongMode Mode { get; }
@@ -201,6 +205,8 @@ public sealed class MahjongSessionView
     public bool IsFinished { get; }
 
     public IReadOnlyList<string> SettlementLines { get; }
+
+    public MahjongLocalOutcome? LocalOutcome { get; }
 }
 
 public enum MahjongAnimationEventKind

@@ -1,4 +1,5 @@
 using Game.Application.Mahjong;
+using Game.Application.Profiles;
 using Game.Mahjong.Table;
 using Game.Mahjong.Tiles;
 using Godot;
@@ -31,13 +32,17 @@ public partial class MahjongTableController : Control
     private Control _lastHandPanel = null!;
     private MahjongMode _mode;
     private Label _playerSeatInfo = null!;
+    private LocalPlayerProfile _profile = null!;
     private Control _resultOverlay = null!;
     private Label _resultDetails = null!;
     private Label _resultTitle = null!;
+    private long? _resultBeanChange;
     private Label _rightSeatInfo = null!;
     private Label _roundInfo = null!;
     private readonly HashSet<MahjongTile> _selectedTiles = [];
+    private Action _saveProfile = null!;
     private IMahjongGameSession _session = null!;
+    private bool _settlementApplied;
     private Label _statusLabel = null!;
     private string _statusMessage = string.Empty;
     private Control _tableGuide = null!;
@@ -86,12 +91,16 @@ public partial class MahjongTableController : Control
     }
 
     public void Initialize(
+        LocalPlayerProfile profile,
+        Action saveProfile,
         MahjongMode mode,
         Action backRequested,
         bool startWithAutoPlay = false,
         double automaticTurnDelaySeconds = DefaultAutomaticTurnDelaySeconds,
         ulong? initialSeed = null)
     {
+        ArgumentNullException.ThrowIfNull(profile);
+        ArgumentNullException.ThrowIfNull(saveProfile);
         ArgumentNullException.ThrowIfNull(backRequested);
         if (!Enum.IsDefined(mode))
         {
@@ -99,13 +108,32 @@ public partial class MahjongTableController : Control
         }
 
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(automaticTurnDelaySeconds);
+        _profile = profile;
+        _saveProfile = saveProfile;
         _mode = mode;
         _backRequested = backRequested;
         _autoEnabled = startWithAutoPlay;
         _automaticTurnDelaySeconds = automaticTurnDelaySeconds;
         _fastAnimations = automaticTurnDelaySeconds <= 0.02;
         _initialized = true;
-        CreateFreshSession(initialSeed);
+        if (_profile.ActiveMahjong is { } recovery)
+        {
+            if (recovery.Mode != mode)
+            {
+                throw new InvalidOperationException("必须先完成已保存的麻将对局。");
+            }
+
+            _session = MahjongSessionFactory.Restore(recovery);
+            _session.StateChanged += SaveSessionProgress;
+            _profile.ActiveMahjong = _session.CreateRecoveryState();
+            _saveProfile();
+            _statusMessage = $"已恢复{ModeText(_mode)}未完成对局。";
+        }
+        else
+        {
+            CreateFreshSession(initialSeed);
+        }
+
         RefreshTable();
         ContinueAutomaticTurns();
     }
@@ -114,9 +142,13 @@ public partial class MahjongTableController : Control
     {
         var seed = seedOverride ?? unchecked((ulong)Interlocked.Increment(ref _lastIssuedSeed));
         _session = MahjongSessionFactory.Start(_mode, seed, MahjongSeat.East);
+        _session.StateChanged += SaveSessionProgress;
+        _settlementApplied = false;
+        _resultBeanChange = null;
         _selectedTiles.Clear();
         _board.ClearSelection();
         _statusMessage = $"{ModeText(_mode)}已开局。";
+        SaveSessionProgress();
     }
 
     private void StartNewMatch()
@@ -137,6 +169,7 @@ public partial class MahjongTableController : Control
     private void ReturnToLobby()
     {
         _lifecycleVersion++;
+        SaveSessionProgress();
         _backRequested?.Invoke();
     }
 
@@ -401,9 +434,22 @@ public partial class MahjongTableController : Control
             MahjongMode.Riichi => "整场结果",
             _ => "本局结算",
         };
-        _resultDetails.Text = view.SettlementLines.Count == 0
-            ? "本局已结束"
-            : string.Join("\n", view.SettlementLines);
+        var lines = view.SettlementLines.Count == 0
+            ? new List<string> { "本局已结束" }
+            : view.SettlementLines.ToList();
+        if (view.LocalOutcome is { } outcome)
+        {
+            lines.Add($"你的得分：{FormatScore(outcome.ScoreChange)}");
+        }
+
+        if (_resultBeanChange is { } beanChange)
+        {
+            var statistics = _profile.MahjongStatistics.For(_mode);
+            lines.Add($"豆子反馈：{FormatScore(beanChange)}  当前 {_profile.Beans:N0}");
+            lines.Add($"战绩：{statistics.GamesWon} 胜 / {statistics.GamesPlayed} 局");
+        }
+
+        _resultDetails.Text = string.Join("\n", lines);
     }
 
     private void OnPlayerSelectionChanged(IReadOnlyList<MahjongTile> tiles)
@@ -450,6 +496,32 @@ public partial class MahjongTableController : Control
         {
             GetTree().Quit();
         }
+    }
+
+    private void SaveSessionProgress()
+    {
+        if (!_initialized)
+        {
+            return;
+        }
+
+        var view = _session.Snapshot;
+        if (view.IsFinished)
+        {
+            if (!_settlementApplied)
+            {
+                var outcome = view.LocalOutcome
+                    ?? throw new InvalidOperationException("已结束麻将对局缺少本地结果。");
+                _resultBeanChange = LocalProfileEconomy.ApplyMahjongOutcome(_profile, _mode, outcome);
+                _settlementApplied = true;
+            }
+        }
+        else
+        {
+            _profile.ActiveMahjong = _session.CreateRecoveryState();
+        }
+
+        _saveProfile();
     }
 
     private static string FormatSeat(MahjongSessionView view, MahjongSeat seat)
